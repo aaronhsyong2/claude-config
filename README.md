@@ -26,14 +26,19 @@ claude-config/
 │       └── testing.md
 ├── hooks/
 │   └── sensitive-path-guard.sh  # Blocks writes to .env, .ssh, credentials, etc.
-├── commands/                  # Custom slash commands
-│   ├── learn.md               # Save learnings to Obsidian vault
-│   ├── obsidian.md            # Manage Obsidian vault notes
-│   └── plan-tasks.md          # Plan tasks for Pi orchestrator
 ├── skills/                    # Custom skills (directory format)
-│   └── pick-up/
-│       ├── SKILL.md           # Route triaged issues to right workflow
-│       └── ROUTING.md         # Routing table, decision signals, pipeline diagram
+│   ├── learn/
+│   │   ├── SKILL.md           # Save learnings to Obsidian vault
+│   │   └── CONVENTIONS.md     # Vault formatting rules
+│   ├── obsidian/
+│   │   ├── SKILL.md           # Manage Obsidian vault notes, blog ideas, indexes
+│   │   └── CONVENTIONS.md     # Vault formatting rules
+│   ├── pick-up/
+│   │   ├── SKILL.md           # Route triaged issues to right workflow
+│   │   └── ROUTING.md         # Routing table, decision signals, pipeline diagram
+│   └── plan-tasks/
+│       ├── SKILL.md           # Plan tasks for Pi orchestrator
+│       └── TASK-FORMAT.md     # Task JSON schema and rules
 └── LICENSE
 ```
 
@@ -68,7 +73,21 @@ claude plugins add ui-ux-pro-max@ui-ux-pro-max-skill
 claude plugins add frontend-design@claude-plugins-official
 ```
 
-### Step 3: Install mattpocock/skills
+### Step 3: Configure MCP servers
+
+Add the Obsidian MCP server (required by `/learn` and `/obsidian` skills):
+
+```bash
+claude mcp add obsidian -- npx @bitbonsai/mcpvault@latest "/path/to/your/obsidian/vault"
+```
+
+Replace the vault path with your actual Obsidian vault location. On macOS with iCloud sync, this is typically:
+
+```
+~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Your Vault Name
+```
+
+### Step 4: Install mattpocock/skills
 
 ```bash
 npx skills@latest add mattpocock/skills
@@ -76,7 +95,7 @@ npx skills@latest add mattpocock/skills
 
 Select all skills and run `/setup-matt-pocock-skills` in Claude Code to configure per-repo settings (issue tracker, triage labels, doc layout).
 
-### Step 4: Copy config files
+### Step 5: Copy config files
 
 ```bash
 REPO=~/github/personal/claude-config
@@ -90,14 +109,11 @@ cp -r "$REPO/rules/" ~/.claude/rules/
 # Custom hooks
 cp "$REPO/hooks/sensitive-path-guard.sh" ~/.claude/hooks/
 
-# Custom commands
-cp "$REPO/commands/"*.md ~/.claude/commands/
-
 # Custom skills
 cp -r "$REPO/skills/"* ~/.claude/skills/
 ```
 
-### Step 5: Fix paths in settings.json
+### Step 6: Fix paths in settings.json
 
 The `settings.json` contains hardcoded paths referencing `$HOME`. After copying, update hook paths to match your home directory:
 
@@ -105,7 +121,7 @@ The `settings.json` contains hardcoded paths referencing `$HOME`. After copying,
 sed -i '' "s|/Users/ayong|$HOME|g" ~/.claude/settings.json
 ```
 
-### Step 6: Verify
+### Step 7: Verify
 
 Start a new Claude Code session and check:
 
