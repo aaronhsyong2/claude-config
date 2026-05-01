@@ -36,9 +36,12 @@ claude-config/
 │   ├── pick-up/
 │   │   ├── SKILL.md           # Route triaged issues to right workflow
 │   │   └── ROUTING.md         # Routing table, decision signals, pipeline diagram
-│   └── plan-tasks/
-│       ├── SKILL.md           # Plan tasks for Pi orchestrator
-│       └── TASK-FORMAT.md     # Task JSON schema and rules
+│   ├── plan-tasks/
+│   │   ├── SKILL.md           # Plan tasks for Pi orchestrator
+│   │   └── TASK-FORMAT.md     # Task JSON schema and rules
+│   └── project-docs/
+│       ├── SKILL.md           # Manage project docs/ with consistent structure
+│       └── TEMPLATES.md       # Frontmatter templates per category
 └── LICENSE
 ```
 
@@ -152,7 +155,7 @@ My idea-to-implementation pipeline:
 
 | Source | Skills | Install Method |
 |--------|--------|----------------|
-| **This repo** | `/pick-up`, `/learn`, `/obsidian`, `/plan-tasks` | Copy to `~/.claude/` |
+| **This repo** | `/pick-up`, `/learn`, `/obsidian`, `/plan-tasks`, `/project-docs` | Copy to `~/.claude/` |
 | **mattpocock/skills** | `/grill-me`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/grill-with-docs`, `/improve-codebase-architecture`, `/zoom-out`, `/write-a-skill` | `npx skills@latest add` |
 | **ECC plugin** | `/prp-plan`, `/prp-implement`, `/feature-dev`, `/plan`, `/blueprint`, `/multi-plan`, `/multi-execute`, `/code-review`, `/build-fix`, etc. | `claude plugins add` |
 | **GSD plugin** | `/gsd-plan-phase`, `/gsd-execute-phase`, `/gsd-quick`, `/gsd-fast`, `/gsd-autonomous`, `/gsd-discuss-phase`, etc. | GSD installer |

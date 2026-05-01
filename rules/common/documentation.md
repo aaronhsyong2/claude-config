@@ -42,7 +42,7 @@ related:
 6. Update `updated` field on every modification
 7. ADR filenames: `NNN-slug.md` with zero-padded numbers
 8. Keep docs focused and scannable — no filler
-9. Use `/docs` skill for creating and managing documentation
+9. Use `/project-docs` skill for creating and managing documentation
 
 ## When to Create Documentation
 
@@ -54,5 +54,5 @@ related:
 
 ## Agent Support
 
-- Use `/docs` skill for all documentation operations
+- Use `/project-docs` skill for all documentation operations
 - Agents should read `docs/INDEX.md` for project documentation context
