@@ -103,7 +103,9 @@ git pull --rebase origin $(git branch --show-current) 2>/dev/null || true
 
 ## Phase 3 — EXECUTE
 
-The orchestrator does NOT edit files. It delegates each task to the assigned domain agent.
+**CRITICAL: You are the ORCHESTRATOR. You must NOT use Edit, Write, or any file-modification
+tool yourself. You MUST delegate every implementation task to a domain agent using the Agent
+tool. If you catch yourself about to edit a file, STOP — that is the agent's job.**
 
 ### Parse Tasks
 
@@ -116,8 +118,9 @@ order. For each block, parse the YAML metadata (`id`, `agent`, `scope`, `depends
 For each task in document order, respecting `depends_on` (a task never starts before its
 dependencies are `done`). Never run two code-editing tasks concurrently (shared working tree).
 
-1. **Delegate** — Use the Agent tool to spawn the task's `agent` (from `~/.claude/agents/`)
-   with this payload and nothing more:
+1. **Delegate** — You MUST call the **Agent tool** with `subagent_type` set to the task's
+   `agent` field (one of: `backend`, `frontend`, `database`, `test`, `docs`). These correspond
+   to agent definitions in `~/.claude/agents/`. Pass this exact prompt — nothing more:
 
    ```
    Task <id>: <heading>
@@ -128,6 +131,14 @@ dependencies are `done`). Never run two code-editing tasks concurrently (shared 
    Validation command: <validation>
    When done, report files changed, validation result, and any OPEN QUESTION.
    ```
+
+   Example Agent tool call for a backend task:
+   ```
+   Agent(subagent_type="backend", description="Implement T2 rate-limit middleware",
+         prompt="Task T2: Add rate-limit middleware\nGoal: ...\nScope: ...")
+   ```
+
+   **Do NOT implement the task yourself. Do NOT use Edit/Write. Only the Agent tool.**
 
 2. **Validate (golden rule)** — After the agent returns:
    - Run the task's `validation` command.
