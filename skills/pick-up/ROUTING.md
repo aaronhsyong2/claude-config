@@ -8,7 +8,7 @@ How `/pick-up` maps triaged issues to downstream workflows.
 |----------|-------|-------|-----|
 | `bug` | `ready-for-agent` | `/diagnose` | Self-contained 6-phase loop: feedback loop → reproduce → hypothesize → instrument → fix → regression test. Runs autonomously. |
 | `bug` | `ready-for-human` | `/diagnose` | Same loop. Agent pauses at checkpoints needing human input (environment access, design judgment, manual testing). |
-| `enhancement` | `ready-for-agent` | `/prp-plan` → `/prp-implement` | Agent brief has clear acceptance criteria and scope. PRP captures codebase patterns, plans, executes with validation. No questions needed. |
+| `enhancement` | `ready-for-agent` | `/prp-plan-team` → `/prp-implement-team` | Agent brief has clear acceptance criteria and scope. PRP captures codebase patterns, plans with agent tags, delegates to domain agents. No questions needed. |
 | `enhancement` | `ready-for-human` | `/feature-dev` | Triage flagged judgment calls needed. Feature-dev's interactive phases (discover → explore → clarify → architecture → implement) resolve ambiguity before committing to code. |
 
 ## What to Pass to Each Route
@@ -22,7 +22,7 @@ Pass as context:
 - Reproduction steps (if in agent brief)
 - Acceptance criteria (used to verify fix)
 
-### `/prp-plan`
+### `/prp-plan-team`
 
 Pass as the feature description argument:
 - Agent brief summary as the feature description
@@ -30,10 +30,10 @@ Pass as the feature description argument:
 - Out of scope (becomes the plan's "NOT Building" section)
 - Key interfaces from agent brief (guides codebase exploration)
 
-After `/prp-plan` produces a plan file:
+After `/prp-plan-team` produces a plan file:
 1. Present plan summary to user
 2. Wait for user confirmation
-3. Invoke `/prp-implement <plan-path>`
+3. Invoke `/prp-implement-team <plan-path>`
 
 ### `/feature-dev`
 
@@ -80,7 +80,7 @@ This skill sits at the end of the idea-to-implementation pipeline:
 /pick-up #N      → route to right workflow (this skill)
   ├── bug        → /diagnose
   └── enhancement
-      ├── clear  → /prp-plan → /prp-implement
+      ├── clear  → /prp-plan-team → /prp-implement-team
       └── unclear → /feature-dev
 ```
 
