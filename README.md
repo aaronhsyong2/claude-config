@@ -7,6 +7,25 @@ My global Claude Code configuration. Everything needed to reproduce my exact set
 ```
 claude-config/
 ├── settings.json              # Permissions, hooks, plugins, thinking toggle
+├── agents/                    # Domain agents for delegated implementation
+│   ├── backend.md             # Server-side logic, APIs, services
+│   ├── frontend.md            # Client/UI code, components, pages
+│   ├── database.md            # Schema, migrations, data layer
+│   ├── test.md                # Test writing and validation
+│   └── docs.md                # Documentation updates (no Bash)
+├── commands/                  # Slash commands (user-owned)
+│   ├── prp-plan-team.md       # Agent-aware planning (fork of /prp-plan)
+│   ├── prp-implement-team.md  # Orchestrator delegation (fork of /prp-implement)
+│   ├── grill-me.md            # Stress-test an idea
+│   ├── grill-with-docs.md     # Grill against existing docs
+│   ├── to-prd.md              # Synthesize conversation into PRD
+│   ├── to-issues.md           # Break PRD into vertical slice issues
+│   ├── triage.md              # Classify + write agent brief
+│   ├── diagnose.md            # 6-phase bug diagnosis loop
+│   ├── tdd.md                 # Test-driven development
+│   ├── improve-codebase-architecture.md
+│   ├── write-a-skill.md       # Create new agent skills
+│   └── zoom-out.md            # Step back and reassess
 ├── rules/
 │   ├── common/                # 9 global rules (all languages)
 │   │   ├── agents.md          # Agent orchestration and parallel execution
@@ -90,15 +109,7 @@ Replace the vault path with your actual Obsidian vault location. On macOS with i
 ~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Your Vault Name
 ```
 
-### Step 4: Install mattpocock/skills
-
-```bash
-npx skills@latest add mattpocock/skills
-```
-
-Select all skills and run `/setup-matt-pocock-skills` in Claude Code to configure per-repo settings (issue tracker, triage labels, doc layout).
-
-### Step 5: Copy config files
+### Step 4: Copy config files
 
 ```bash
 REPO=~/github/personal/claude-config
@@ -114,9 +125,15 @@ cp "$REPO/hooks/sensitive-path-guard.sh" ~/.claude/hooks/
 
 # Custom skills
 cp -r "$REPO/skills/"* ~/.claude/skills/
+
+# Domain agents
+cp -r "$REPO/agents/"* ~/.claude/agents/
+
+# Custom commands
+cp -r "$REPO/commands/"* ~/.claude/commands/
 ```
 
-### Step 6: Fix paths in settings.json
+### Step 5: Fix paths in settings.json
 
 The `settings.json` contains hardcoded paths referencing `$HOME`. After copying, update hook paths to match your home directory:
 
@@ -124,14 +141,15 @@ The `settings.json` contains hardcoded paths referencing `$HOME`. After copying,
 sed -i '' "s|/Users/ayong|$HOME|g" ~/.claude/settings.json
 ```
 
-### Step 7: Verify
+### Step 6: Verify
 
 Start a new Claude Code session and check:
 
 ```
 /pick-up          # Should be available
-/triage           # From mattpocock/skills
-/prp-plan         # From ECC plugin
+/triage           # Should be available
+/prp-plan-team    # Agent-aware planning
+/grill-me         # Should be available
 /gsd-help         # From GSD plugin
 ```
 
@@ -147,7 +165,7 @@ My idea-to-implementation pipeline:
 /pick-up #N      → Route to right workflow:
   ├── bug        → /diagnose (6-phase loop)
   └── enhancement
-      ├── clear  → /prp-plan → /prp-implement
+      ├── clear  → /prp-plan-team → /prp-implement-team (delegated to domain agents)
       └── unclear → /feature-dev (interactive)
 ```
 
@@ -155,8 +173,7 @@ My idea-to-implementation pipeline:
 
 | Source | Skills | Install Method |
 |--------|--------|----------------|
-| **This repo** | `/pick-up`, `/learn`, `/obsidian`, `/plan-tasks`, `/project-docs` | Copy to `~/.claude/` |
-| **mattpocock/skills** | `/grill-me`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/grill-with-docs`, `/improve-codebase-architecture`, `/zoom-out`, `/write-a-skill` | `npx skills@latest add` |
+| **This repo** | `/pick-up`, `/learn`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out` + 5 domain agents | Copy to `~/.claude/` |
 | **ECC plugin** | `/prp-plan`, `/prp-implement`, `/feature-dev`, `/plan`, `/blueprint`, `/multi-plan`, `/multi-execute`, `/code-review`, `/build-fix`, etc. | `claude plugins add` |
 | **GSD plugin** | `/gsd-plan-phase`, `/gsd-execute-phase`, `/gsd-quick`, `/gsd-fast`, `/gsd-autonomous`, `/gsd-discuss-phase`, etc. | GSD installer |
 | **Caveman** | `/caveman`, `/caveman-commit`, `/caveman-review` | `claude plugins add` |
@@ -171,7 +188,6 @@ These are managed by plugins or are transient — don't version them:
 - `~/.claude/get-shit-done/` — GSD framework internals
 - `~/.claude/plugins/` — Plugin cache/data (managed by `claude plugins`)
 - `~/.claude/sessions/`, `session-data/`, `history.jsonl` — Personal session data
-- `~/.claude/commands/` files from mattpocock/skills — Installed via `npx skills`
 
 ## Permissions Philosophy
 
