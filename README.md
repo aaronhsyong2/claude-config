@@ -79,20 +79,32 @@ git clone https://github.com/ayong/claude-config.git ~/github/personal/claude-co
 
 ### Step 2: Install plugins
 
+The current Claude Code CLI installs plugins in two steps — add the marketplace, then install from it (`claude plugins add X@Y` no longer exists).
+
 ```bash
-# Everything Claude Code (provides /prp-plan, /prp-implement, /feature-dev, /plan, etc.)
-claude plugins add everything-claude-code@everything-claude-code
+# ECC — Everything Claude Code (provides /prp-plan, /prp-implement, /feature-dev,
+# /plan, /multi-plan, /multi-execute, /code-review, /build-fix, etc.)
+# NOTE: the plugin is `ecc@ecc` from affaan-m/ECC — NOT `everything-claude-code`,
+# which is a slimmed-down public release that lacks the PRP/blueprint/multi commands.
+claude plugins marketplace add affaan-m/ECC
+claude plugins install ecc@ecc
+
+# Caveman mode (compressed communication)
+claude plugins marketplace add JuliusBrussee/caveman
+claude plugins install caveman@caveman
+
+# UI/UX design skills
+claude plugins marketplace add nextlevelbuilder/ui-ux-pro-max-skill
+claude plugins install ui-ux-pro-max@ui-ux-pro-max-skill
+
+# Frontend design (from the built-in official marketplace)
+claude plugins install frontend-design@claude-plugins-official
 
 # GSD - Get Shit Done (provides /gsd-* skills, agents, hooks, workflows)
 # https://github.com/gsd-build/get-shit-done
+# Run this BEFORE copying settings.json — it installs the gsd-* hooks that
+# settings.json references and writes correct, machine-specific hook paths.
 npx get-shit-done-cc --claude --global
-
-# Caveman mode (compressed communication)
-claude plugins add caveman@caveman
-
-# UI/UX design skills
-claude plugins add ui-ux-pro-max@ui-ux-pro-max-skill
-claude plugins add frontend-design@claude-plugins-official
 ```
 
 ### Step 3: Configure MCP servers
@@ -135,11 +147,16 @@ cp -r "$REPO/commands/"* ~/.claude/commands/
 
 ### Step 5: Fix paths in settings.json
 
-The `settings.json` contains hardcoded paths referencing `$HOME`. After copying, update hook paths to match your home directory:
+The committed `settings.json` hardcodes macOS paths (`/Users/ayong`). After copying, rewrite them to your home directory.
 
 ```bash
+# macOS:
 sed -i '' "s|/Users/ayong|$HOME|g" ~/.claude/settings.json
+# Linux:
+sed -i "s|/Users/ayong|$HOME|g" ~/.claude/settings.json
 ```
+
+> If you ran the GSD installer (Step 2) **before** copying, GSD will have already written a `settings.json` with correct hook paths for your machine. In that case, don't blindly overwrite it — merge the repo's `permissions`, the `sensitive-path-guard.sh` hook, the prettier-on-save hook, and `alwaysThinkingEnabled` into GSD's version instead of running the `cp` in Step 4.
 
 ### Step 6: Verify
 
@@ -174,9 +191,9 @@ My idea-to-implementation pipeline:
 | Source | Skills | Install Method |
 |--------|--------|----------------|
 | **This repo** | `/pick-up`, `/learn`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out` + 5 domain agents | Copy to `~/.claude/` |
-| **ECC plugin** | `/prp-plan`, `/prp-implement`, `/feature-dev`, `/plan`, `/blueprint`, `/multi-plan`, `/multi-execute`, `/code-review`, `/build-fix`, etc. | `claude plugins add` |
+| **ECC plugin** (`ecc@ecc`, from affaan-m/ECC) | `/prp-plan`, `/prp-implement`, `/prp-commit`, `/feature-dev`, `/plan`, `/multi-plan`, `/multi-execute`, `/code-review`, `/build-fix`, etc. | `marketplace add` + `install` |
 | **GSD plugin** | `/gsd-plan-phase`, `/gsd-execute-phase`, `/gsd-quick`, `/gsd-fast`, `/gsd-autonomous`, `/gsd-discuss-phase`, etc. | GSD installer |
-| **Caveman** | `/caveman`, `/caveman-commit`, `/caveman-review` | `claude plugins add` |
+| **Caveman** | `/caveman`, `/caveman-commit`, `/caveman-review` | `marketplace add` + `install` |
 
 ## What's NOT in This Repo
 
