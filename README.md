@@ -7,6 +7,7 @@ My global Claude Code configuration. Everything needed to reproduce my exact set
 ```
 claude-config/
 ├── settings.json              # Permissions, hooks, plugins, thinking toggle
+├── CLAUDE.md                  # Global instructions (gstack skills, agent house style)
 ├── agents/                    # Domain agents for delegated implementation
 │   ├── backend.md             # Server-side logic, APIs, services
 │   ├── frontend.md            # Client/UI code, components, pages
@@ -46,7 +47,7 @@ claude-config/
 ├── hooks/
 │   └── sensitive-path-guard.sh  # Blocks writes to .env, .ssh, credentials, etc.
 ├── skills/                    # Custom skills (directory format)
-│   ├── learn/
+│   ├── learn-obsidian/
 │   │   ├── SKILL.md           # Save learnings to Obsidian vault
 │   │   └── CONVENTIONS.md     # Vault formatting rules
 │   ├── obsidian/
@@ -109,7 +110,7 @@ npx get-shit-done-cc --claude --global
 
 ### Step 3: Configure MCP servers
 
-Add the Obsidian MCP server (required by `/learn` and `/obsidian` skills):
+Add the Obsidian MCP server (required by `/learn-obsidian` and `/obsidian` skills):
 
 ```bash
 claude mcp add obsidian -- npx @bitbonsai/mcpvault@latest "/path/to/your/obsidian/vault"
@@ -128,6 +129,9 @@ REPO=~/github/personal/claude-config
 
 # Settings (permissions, hooks, plugins)
 cp "$REPO/settings.json" ~/.claude/settings.json
+
+# Global instructions
+cp "$REPO/CLAUDE.md" ~/.claude/CLAUDE.md
 
 # Rules
 cp -r "$REPO/rules/" ~/.claude/rules/
@@ -190,7 +194,7 @@ My idea-to-implementation pipeline:
 
 | Source | Skills | Install Method |
 |--------|--------|----------------|
-| **This repo** | `/pick-up`, `/learn`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out` + 5 domain agents | Copy to `~/.claude/` |
+| **This repo** | `/pick-up`, `/learn-obsidian`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out` + 5 domain agents | Copy to `~/.claude/` |
 | **ECC plugin** (`ecc@ecc`, from affaan-m/ECC) | `/prp-plan`, `/prp-implement`, `/prp-commit`, `/feature-dev`, `/plan`, `/multi-plan`, `/multi-execute`, `/code-review`, `/build-fix`, etc. | `marketplace add` + `install` |
 | **GSD plugin** | `/gsd-plan-phase`, `/gsd-execute-phase`, `/gsd-quick`, `/gsd-fast`, `/gsd-autonomous`, `/gsd-discuss-phase`, etc. | GSD installer |
 | **Caveman** | `/caveman`, `/caveman-commit`, `/caveman-review` | `marketplace add` + `install` |

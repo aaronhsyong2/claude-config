@@ -1,5 +1,5 @@
 ---
-name: learn
+name: learn-obsidian
 description: Save learnings to Obsidian vault. Use when user wants to capture knowledge, save a learning, or preserve something from the current session.
 ---
 
