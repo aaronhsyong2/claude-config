@@ -26,6 +26,8 @@ claude-config/
 │   ├── tdd.md                 # Test-driven development
 │   ├── improve-codebase-architecture.md
 │   ├── write-a-skill.md       # Create new agent skills
+│   ├── visual-plan.md         # Wrapper → visual-plan skill
+│   ├── visual-recap.md        # Wrapper → visual-recap skill
 │   └── zoom-out.md            # Step back and reassess
 ├── rules/
 │   ├── common/                # 9 global rules (all languages)
@@ -59,9 +61,21 @@ claude-config/
 │   ├── plan-tasks/
 │   │   ├── SKILL.md           # Plan tasks for Pi orchestrator
 │   │   └── TASK-FORMAT.md     # Task JSON schema and rules
-│   └── project-docs/
-│       ├── SKILL.md           # Manage project docs/ with consistent structure
-│       └── TEMPLATES.md       # Frontmatter templates per category
+│   ├── project-docs/
+│   │   ├── SKILL.md           # Manage project docs/ with consistent structure
+│   │   └── TEMPLATES.md       # Frontmatter templates per category
+│   ├── to-pr-plan/            # Group issues into ordered PR batches
+│   │   ├── SKILL.md
+│   │   ├── FORMAT.md
+│   │   └── SOURCES.md
+│   ├── visual-plan/           # Agent-Native interactive visual plans
+│   │   ├── SKILL.md
+│   │   ├── agent-native-skill.json
+│   │   └── references/        # canvas, wireframe, document-quality, exemplar
+│   └── visual-recap/          # Agent-Native visual recaps (PR/branch/diff)
+│       ├── SKILL.md
+│       ├── agent-native-skill.json
+│       └── references/
 └── LICENSE
 ```
 
@@ -100,6 +114,10 @@ claude plugins install ui-ux-pro-max@ui-ux-pro-max-skill
 
 # Frontend design (from the built-in official marketplace)
 claude plugins install frontend-design@claude-plugins-official
+
+# Warp — terminal/agent helpers
+claude plugins marketplace add warpdotdev/claude-code-warp
+claude plugins install warp@claude-code-warp
 
 # GSD - Get Shit Done (provides /gsd-* skills, agents, hooks, workflows)
 # https://github.com/gsd-build/get-shit-done
@@ -171,6 +189,8 @@ Start a new Claude Code session and check:
 /triage           # Should be available
 /prp-plan-team    # Agent-aware planning
 /grill-me         # Should be available
+/visual-plan      # Agent-Native visual plan
+/visual-recap     # Agent-Native visual recap
 /gsd-help         # From GSD plugin
 ```
 
@@ -194,10 +214,12 @@ My idea-to-implementation pipeline:
 
 | Source | Skills | Install Method |
 |--------|--------|----------------|
-| **This repo** | `/pick-up`, `/learn-obsidian`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out` + 5 domain agents | Copy to `~/.claude/` |
+| **This repo** | `/pick-up`, `/learn-obsidian`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/to-pr-plan`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out` + 5 domain agents | Copy to `~/.claude/` |
+| **Agent-Native** (`visual-plan`, `visual-recap`) | `/visual-plan`, `/visual-recap` | Versioned here as files; created via the [Agent-Native template-plan doc](https://www.agent-native.com/docs/template-plan). Copy to `~/.claude/`; refresh with `npx @agent-native/core@latest skills update <name>` |
 | **ECC plugin** (`ecc@ecc`, from affaan-m/ECC) | `/prp-plan`, `/prp-implement`, `/prp-commit`, `/feature-dev`, `/plan`, `/multi-plan`, `/multi-execute`, `/code-review`, `/build-fix`, etc. | `marketplace add` + `install` |
 | **GSD plugin** | `/gsd-plan-phase`, `/gsd-execute-phase`, `/gsd-quick`, `/gsd-fast`, `/gsd-autonomous`, `/gsd-discuss-phase`, etc. | GSD installer |
 | **Caveman** | `/caveman`, `/caveman-commit`, `/caveman-review` | `marketplace add` + `install` |
+| **Warp** (`warp@claude-code-warp`) | terminal/agent helpers | `marketplace add` + `install` |
 
 ## What's NOT in This Repo
 
