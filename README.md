@@ -13,7 +13,8 @@ claude-config/
 │   ├── frontend.md            # Client/UI code, components, pages
 │   ├── database.md            # Schema, migrations, data layer
 │   ├── test.md                # Test writing and validation
-│   └── docs.md                # Documentation updates (no Bash)
+│   ├── docs.md                # Documentation updates (no Bash)
+│   └── trello-standup.md      # Uni Enrol standup board (needs Trello MCP)
 ├── commands/                  # Slash commands (user-owned)
 │   ├── prp-plan-team.md       # Agent-aware planning (fork of /prp-plan)
 │   ├── prp-implement-team.md  # Orchestrator delegation (fork of /prp-implement)
@@ -146,6 +147,17 @@ Replace the vault path with your actual Obsidian vault location. On macOS with i
 ~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Your Vault Name
 ```
 
+Add the Trello MCP server (required by the `trello-standup` agent):
+
+```bash
+claude mcp add trello \
+  -e TRELLO_API_KEY=your_trello_api_key \
+  -e TRELLO_TOKEN=your_trello_token \
+  -- npx -y @delorenj/mcp-server-trello
+```
+
+Get an API key + token from https://trello.com/power-ups/admin (create a Power-Up, then generate a token). Keep both out of git — they are secrets, never commit real values.
+
 ### Step 4: Copy config files
 
 ```bash
@@ -201,6 +213,14 @@ Start a new Claude Code session and check:
 /gsd-help         # From GSD plugin
 ```
 
+### `trello-standup` agent setup
+
+The `trello-standup` agent manages the Uni Enrol **Daily Stand-Up** board. It needs the Trello MCP server (Step 3) — without it the `mcp__trello__*` tools are unavailable and the agent can't run.
+
+1. Add the Trello MCP server with your own key + token (Step 3 above). Both are secrets — set them as `-e` env vars, never commit them.
+2. Copy the agent: it ships in `agents/trello-standup.md` and lands in `~/.claude/agents/` via the Step 4 `cp`.
+3. The board/list/workspace IDs are hardcoded in the agent for the Uni Enrol workspace. Using it for a different board? Edit those IDs, or tell the agent to re-fetch with `get_lists` / `list_boards_in_workspace` — it treats the IDs as a cache and re-resolves stale ones.
+
 ## Workflow Pipeline
 
 My idea-to-implementation pipeline:
@@ -221,7 +241,7 @@ My idea-to-implementation pipeline:
 
 | Source | Skills | Install Method |
 |--------|--------|----------------|
-| **This repo** | `/pick-up`, `/learn-obsidian`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/to-pr-plan`, `/visual-docs`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out` + 5 domain agents | Copy to `~/.claude/`. `visual-docs` needs a one-time `npm install` in `skills/visual-docs/scripts/` |
+| **This repo** | `/pick-up`, `/learn-obsidian`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/to-pr-plan`, `/visual-docs`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out` + 6 domain agents | Copy to `~/.claude/`. `visual-docs` needs a one-time `npm install` in `skills/visual-docs/scripts/` |
 | **Agent-Native** (`visual-plan`, `visual-recap`) | `/visual-plan`, `/visual-recap` | Versioned here as files; created via the [Agent-Native template-plan doc](https://www.agent-native.com/docs/template-plan). Copy to `~/.claude/`; refresh with `npx @agent-native/core@latest skills update <name>` |
 | **ECC plugin** (`ecc@ecc`, from affaan-m/ECC) | `/prp-plan`, `/prp-implement`, `/prp-commit`, `/feature-dev`, `/plan`, `/multi-plan`, `/multi-execute`, `/code-review`, `/build-fix`, etc. | `marketplace add` + `install` |
 | **GSD plugin** | `/gsd-plan-phase`, `/gsd-execute-phase`, `/gsd-quick`, `/gsd-fast`, `/gsd-autonomous`, `/gsd-discuss-phase`, etc. | GSD installer |
