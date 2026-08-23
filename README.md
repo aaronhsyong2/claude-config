@@ -8,12 +8,22 @@ My global Claude Code configuration. Everything needed to reproduce my exact set
 claude-config/
 ├── settings.json              # Permissions, hooks, plugins, thinking toggle
 ├── CLAUDE.md                  # Global instructions (gstack skills, agent house style)
-├── agents/                    # Domain agents for delegated implementation
+├── agents/                    # Domain agents + vendored review specialists
 │   ├── backend.md             # Server-side logic, APIs, services
 │   ├── frontend.md            # Client/UI code, components, pages
 │   ├── database.md            # Schema, migrations, data layer
 │   ├── test.md                # Test writing and validation
-│   └── docs.md                # Documentation updates (no Bash)
+│   ├── docs.md                # Documentation updates (no Bash)
+│   ├── code-reviewer.md       # ↓ the 10 agents /ecc-review-pr spawns (vendored from ECC)
+│   ├── code-simplifier.md
+│   ├── comment-analyzer.md
+│   ├── database-reviewer.md
+│   ├── pr-test-analyzer.md
+│   ├── react-reviewer.md
+│   ├── security-reviewer.md
+│   ├── silent-failure-hunter.md
+│   ├── type-design-analyzer.md
+│   └── typescript-reviewer.md
 ├── commands/                  # Slash commands (user-owned)
 │   ├── prp-plan-team.md       # Agent-aware planning (fork of /prp-plan)
 │   ├── prp-implement-team.md  # Orchestrator delegation (fork of /prp-implement)
@@ -26,7 +36,9 @@ claude-config/
 │   ├── tdd.md                 # Test-driven development
 │   ├── improve-codebase-architecture.md
 │   ├── write-a-skill.md       # Create new agent skills
-│   └── zoom-out.md            # Step back and reassess
+│   ├── zoom-out.md            # Step back and reassess
+│   ├── ecc-code-review.md     # Local diff / PR review (vendored from ECC)
+│   └── ecc-review-pr.md       # Multi-agent PR review (vendored from ECC)
 ├── rules/
 │   ├── common/                # 9 global rules (all languages)
 │   │   ├── agents.md          # Agent orchestration and parallel execution
@@ -45,7 +57,9 @@ claude-config/
 │       ├── security.md
 │       └── testing.md
 ├── hooks/
-│   └── sensitive-path-guard.sh  # Blocks writes to .env, .ssh, credentials, etc.
+│   ├── sensitive-path-guard.sh  # Blocks writes to .env, .ssh, credentials, etc.
+│   ├── statusline.js            # Statusline: model | task | dir | context usage
+│   └── suggest-compact.js       # Optional PreToolUse compaction nudge (not wired by default)
 ├── skills/                    # Custom skills (directory format)
 │   ├── learn-obsidian/
 │   │   ├── SKILL.md           # Save learnings to Obsidian vault
@@ -59,9 +73,15 @@ claude-config/
 │   ├── plan-tasks/
 │   │   ├── SKILL.md           # Plan tasks for Pi orchestrator
 │   │   └── TASK-FORMAT.md     # Task JSON schema and rules
-│   └── project-docs/
-│       ├── SKILL.md           # Manage project docs/ with consistent structure
-│       └── TEMPLATES.md       # Frontmatter templates per category
+│   ├── project-docs/
+│   │   ├── SKILL.md           # Manage project docs/ with consistent structure
+│   │   └── TEMPLATES.md       # Frontmatter templates per category
+│   ├── strategic-compact/
+│   │   └── SKILL.md           # Compact at logical boundaries (vendored from ECC)
+│   └── to-pr-plan/
+│       ├── SKILL.md           # Group epic issues into PR batches
+│       ├── FORMAT.md
+│       └── SOURCES.md
 └── LICENSE
 ```
 
@@ -83,13 +103,6 @@ git clone https://github.com/ayong/claude-config.git ~/github/personal/claude-co
 The current Claude Code CLI installs plugins in two steps — add the marketplace, then install from it (`claude plugins add X@Y` no longer exists).
 
 ```bash
-# ECC — Everything Claude Code (provides /prp-plan, /prp-implement, /feature-dev,
-# /plan, /multi-plan, /multi-execute, /code-review, /build-fix, etc.)
-# NOTE: the plugin is `ecc@ecc` from affaan-m/ECC — NOT `everything-claude-code`,
-# which is a slimmed-down public release that lacks the PRP/blueprint/multi commands.
-claude plugins marketplace add affaan-m/ECC
-claude plugins install ecc@ecc
-
 # Caveman mode (compressed communication)
 claude plugins marketplace add JuliusBrussee/caveman
 claude plugins install caveman@caveman
@@ -100,13 +113,11 @@ claude plugins install ui-ux-pro-max@ui-ux-pro-max-skill
 
 # Frontend design (from the built-in official marketplace)
 claude plugins install frontend-design@claude-plugins-official
-
-# GSD - Get Shit Done (provides /gsd-* skills, agents, hooks, workflows)
-# https://github.com/gsd-build/get-shit-done
-# Run this BEFORE copying settings.json — it installs the gsd-* hooks that
-# settings.json references and writes correct, machine-specific hook paths.
-npx get-shit-done-cc --claude --global
 ```
+
+> **No ECC plugin, no GSD.** Both were removed after a usage audit — see
+> [Removed: ECC and GSD](#removed-ecc-and-gsd). The three ECC pieces actually
+> used are vendored into this repo and install with Step 4.
 
 ### Step 3: Configure MCP servers
 
@@ -127,7 +138,7 @@ Replace the vault path with your actual Obsidian vault location. On macOS with i
 ```bash
 REPO=~/github/personal/claude-config
 
-# Settings (permissions, hooks, plugins)
+# Settings (permissions, hooks, plugins, statusline)
 cp "$REPO/settings.json" ~/.claude/settings.json
 
 # Global instructions
@@ -136,13 +147,13 @@ cp "$REPO/CLAUDE.md" ~/.claude/CLAUDE.md
 # Rules
 cp -r "$REPO/rules/" ~/.claude/rules/
 
-# Custom hooks
-cp "$REPO/hooks/sensitive-path-guard.sh" ~/.claude/hooks/
+# Hooks (guard + statusline + optional compaction nudge)
+mkdir -p ~/.claude/hooks && cp "$REPO/hooks/"* ~/.claude/hooks/
 
 # Custom skills
 cp -r "$REPO/skills/"* ~/.claude/skills/
 
-# Domain agents
+# Domain agents + vendored review specialists
 cp -r "$REPO/agents/"* ~/.claude/agents/
 
 # Custom commands
@@ -160,19 +171,25 @@ sed -i '' "s|/Users/ayong|$HOME|g" ~/.claude/settings.json
 sed -i "s|/Users/ayong|$HOME|g" ~/.claude/settings.json
 ```
 
-> If you ran the GSD installer (Step 2) **before** copying, GSD will have already written a `settings.json` with correct hook paths for your machine. In that case, don't blindly overwrite it — merge the repo's `permissions`, the `sensitive-path-guard.sh` hook, the prettier-on-save hook, and `alwaysThinkingEnabled` into GSD's version instead of running the `cp` in Step 4.
+`settings.json` references two hooks by absolute path — `sensitive-path-guard.sh`
+(PreToolUse on `Write|Edit`) and `statusline.js` (statusLine). Both ship in
+`hooks/`, so Step 4 + the `sed` above are all that's needed.
 
 ### Step 6: Verify
 
 Start a new Claude Code session and check:
 
 ```
-/pick-up          # Should be available
-/triage           # Should be available
-/prp-plan-team    # Agent-aware planning
-/grill-me         # Should be available
-/gsd-help         # From GSD plugin
+/pick-up            # Should be available
+/triage             # Should be available
+/prp-plan-team      # Agent-aware planning
+/grill-me           # Should be available
+/ecc-review-pr      # Multi-agent PR review (vendored)
 ```
+
+The statusline should render `model │ task │ dir │ context`. If it's blank,
+`~/.claude/hooks/statusline.js` is missing or the path in `settings.json`
+wasn't rewritten.
 
 ## Workflow Pipeline
 
@@ -182,31 +199,78 @@ My idea-to-implementation pipeline:
 /grill-me        → Stress-test the idea (conversation)
 /to-prd          → Synthesize into PRD (GitHub issue)
 /to-issues       → Break into vertical slices (GitHub issues)
+/to-pr-plan      → Group into PR batches with dependency order
 /triage          → Classify + write agent brief (labels + comment)
 /pick-up #N      → Route to right workflow:
   ├── bug        → /diagnose (6-phase loop)
   └── enhancement
       ├── clear  → /prp-plan-team → /prp-implement-team (delegated to domain agents)
-      └── unclear → /feature-dev (interactive)
+      └── unclear → interactive planning
+```
+
+Review side:
+
+```
+/ecc-code-review → Local uncommitted diff, or a PR by number
+/ecc-review-pr   → Full multi-agent PR review; spawns code-reviewer,
+                   comment-analyzer, pr-test-analyzer, silent-failure-hunter,
+                   type-design-analyzer, code-simplifier
 ```
 
 ### Skill Sources
 
 | Source | Skills | Install Method |
 |--------|--------|----------------|
-| **This repo** | `/pick-up`, `/learn-obsidian`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out` + 5 domain agents | Copy to `~/.claude/` |
-| **ECC plugin** (`ecc@ecc`, from affaan-m/ECC) | `/prp-plan`, `/prp-implement`, `/prp-commit`, `/feature-dev`, `/plan`, `/multi-plan`, `/multi-execute`, `/code-review`, `/build-fix`, etc. | `marketplace add` + `install` |
-| **GSD plugin** | `/gsd-plan-phase`, `/gsd-execute-phase`, `/gsd-quick`, `/gsd-fast`, `/gsd-autonomous`, `/gsd-discuss-phase`, etc. | GSD installer |
+| **This repo** | `/pick-up`, `/learn-obsidian`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/to-pr-plan`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out`, `/ecc-code-review`, `/ecc-review-pr`, `/strategic-compact` + 15 agents | Copy to `~/.claude/` |
+| **gstack** | `/browse`, `/ship`, `/review`, `/qa`, `/codex`, `/autopilot`, etc. | External installer (`~/.agents/skills/gstack`) |
 | **Caveman** | `/caveman`, `/caveman-commit`, `/caveman-review` | `marketplace add` + `install` |
+| **Matt Pocock skills** | `/setup-matt-pocock-skills` and friends | External — see [mattpocock/skills](https://github.com/mattpocock/skills) |
+
+## Removed: ECC and GSD
+
+Both were removed on 2026-08-24 after auditing 608 session transcripts for
+actual invocations (`<command-name>`, `Skill` tool, `subagent_type`).
+
+**GSD (`get-shit-done`) — removed entirely.** Zero invocations, ever: 0 of 67
+skills, 0 of 33 agents, 0 `/gsd:*` commands. It still cost ~2,081 tokens of
+context per session (it appeared in 335 sessions) and installed 9 hooks —
+including PreToolUse on `Write|Edit` ×3 and PostToolUse on
+`Bash|Edit|Write|MultiEdit|Agent|Task` — that spawned a process on nearly every
+tool call while no-op'ing, since all of them are gated on a `.planning/`
+directory. Removed: `~/.claude/skills/gsd-*`, `~/.claude/agents/gsd-*.md`,
+`~/.claude/hooks/gsd-*`, `~/.claude/get-shit-done/`, the installer state files,
+and the 9 hook entries in `settings.json`.
+
+`gsd-statusline.js` was the one piece worth keeping — it is not workflow-coupled.
+It lives on as `hooks/statusline.js`, decoupled from the GSD name.
+
+**ECC (`ecc@ecc`) — uninstalled, the used parts vendored.** Only 3 of its ~363
+commands and skills were ever invoked (`/ecc:strategic-compact` ×170,
+`/ecc:code-review` ×120, `/ecc:review-pr` ×104), plus 10 of its 67 agents — all
+of them spawned by those two review commands. The plugin cost ~6,166 tokens of
+context per session and 191 MB on disk. A plugin is a read-only bundle and can't
+be partially trimmed, so the used pieces were copied into this repo instead:
+
+- `commands/ecc-code-review.md`, `commands/ecc-review-pr.md` — prefixed `ecc-`
+  to avoid colliding with Claude Code's built-in `/code-review`
+- `skills/strategic-compact/`
+- the 10 agents listed in the tree above
+- `hooks/suggest-compact.js` — the script `strategic-compact` documents. Not
+  wired in `settings.json` (it never was); add a PreToolUse `Edit|Write` entry
+  if you want the automatic nudge.
+
+Also cleaned up: 10 broken symlinks in `~/.claude/skills/` (`diagnose`,
+`grill-me`, `grill-with-docs`, `improve-codebase-architecture`, `tdd`,
+`to-issues`, `to-prd`, `triage`, `write-a-skill`, `zoom-out`) that pointed at a
+nonexistent `~/.agents/skills/` target. Those commands were never broken — they
+resolve from `~/.claude/commands/*.md` — but the dead links showed up as
+nameless entries in the skill listing.
 
 ## What's NOT in This Repo
 
-These are managed by plugins or are transient — don't version them:
+These are managed elsewhere or are transient — don't version them:
 
-- `~/.claude/agents/gsd-*.md` — GSD plugin manages these
-- `~/.claude/skills/gsd-*` — GSD plugin manages these
-- `~/.claude/hooks/gsd-*` — GSD plugin manages these
-- `~/.claude/get-shit-done/` — GSD framework internals
+- `~/.claude/skills/gstack/` and `~/.agents/skills/` — gstack, external installer
 - `~/.claude/plugins/` — Plugin cache/data (managed by `claude plugins`)
 - `~/.claude/sessions/`, `session-data/`, `history.jsonl` — Personal session data
 

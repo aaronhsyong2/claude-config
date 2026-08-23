@@ -78,85 +78,27 @@
   "hooks": {
     "SessionStart": [
       {
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/Users/ayong/.claude/hooks/gsd-check-update.js\""
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash /Users/ayong/.claude/hooks/gsd-session-state.sh"
+            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"SessionStart\""
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "Bash|Edit|Write|MultiEdit|Agent|Task",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"/Users/ayong/.claude/hooks/gsd-context-monitor.js\"",
-            "timeout": 10
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash /Users/ayong/.claude/hooks/gsd-phase-boundary.sh",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Read",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"/Users/ayong/.claude/hooks/gsd-read-injection-scanner.js\"",
-            "timeout": 5
+            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"PostToolUse\""
           }
         ]
       }
     ],
     "PreToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"/Users/ayong/.claude/hooks/gsd-prompt-guard.js\"",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"/Users/ayong/.claude/hooks/gsd-read-guard.js\"",
-            "timeout": 5
-          }
-        ]
-      },
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"/Users/ayong/.claude/hooks/gsd-workflow-guard.js\"",
-            "timeout": 5
-          }
-        ]
-      },
       {
         "matcher": "Write|Edit",
         "hooks": [
@@ -168,12 +110,99 @@
         ]
       },
       {
-        "matcher": "Bash",
+        "matcher": "",
         "hooks": [
           {
             "type": "command",
-            "command": "bash /Users/ayong/.claude/hooks/gsd-validate-commit.sh",
-            "timeout": 5
+            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"PreToolUse\""
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"SessionEnd\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"UserPromptSubmit\""
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"PermissionRequest\""
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"PostToolUseFailure\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"Stop\""
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"StopFailure\""
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"Notification\""
+          }
+        ]
+      }
+    ],
+    "Elicitation": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"Elicitation\""
           }
         ]
       }
@@ -181,13 +210,12 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "node \"/Users/ayong/.claude/hooks/gsd-statusline.js\""
+    "command": "node \"/Users/ayong/.claude/hooks/statusline.js\""
   },
   "enabledPlugins": {
     "ui-ux-pro-max@ui-ux-pro-max-skill": true,
     "frontend-design@claude-plugins-official": true,
     "caveman@caveman": true,
-    "ecc@ecc": true,
     "ruby-lsp@claude-plugins-official": true
   },
   "extraKnownMarketplaces": {
@@ -207,12 +235,6 @@
       "source": {
         "source": "github",
         "repo": "JuliusBrussee/caveman"
-      }
-    },
-    "ecc": {
-      "source": {
-        "source": "github",
-        "repo": "affaan-m/ECC"
       }
     }
   },
