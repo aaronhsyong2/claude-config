@@ -1,47 +1,14 @@
 # Global Instructions
 
-## gstack
+## Web browsing
 
-Use the `/browse` skill from gstack for all web browsing. Never use `mcp__claude-in-chrome__*` tools.
+Use the `chrome-devtools` MCP tools (`mcp__chrome-devtools__*`) for browser work —
+navigation, form filling, screenshots, console and network inspection, performance
+traces, Lighthouse audits. Prefer `take_snapshot` over a screenshot when you need
+the page's structure rather than its pixels.
 
-### Available Skills
-
-- `/office-hours` — YC-style office hours
-- `/plan-ceo-review` — CEO/founder plan review
-- `/plan-eng-review` — Eng manager plan review
-- `/plan-design-review` — Designer plan review
-- `/design-consultation` — Design consultation with research
-- `/design-shotgun` — Multiple AI design variants
-- `/design-html` — Production-quality HTML output
-- `/review` — Pre-landing PR review
-- `/ship` — Ship workflow (merge, test, review, deploy)
-- `/land-and-deploy` — Merge PR and deploy
-- `/canary` — Post-deploy canary monitoring
-- `/benchmark` — Performance regression detection
-- `/browse` — Headless browser for QA and dogfooding
-- `/connect-chrome` — Connect to running Chrome
-- `/qa` — QA test and fix bugs
-- `/qa-only` — Report-only QA testing
-- `/design-review` — Visual QA audit
-- `/setup-browser-cookies` — Import browser cookies
-- `/setup-deploy` — Configure deployment settings
-- `/setup-gbrain` — Set up gbrain for agent
-- `/retro` — Weekly engineering retrospective
-- `/investigate` — Systematic debugging
-- `/document-release` — Post-ship docs update
-- `/codex` — OpenAI Codex CLI wrapper
-- `/cso` — Chief Security Officer audit
-- `/autoplan` — Auto-review pipeline
-- `/plan-devex-review` — Developer experience review
-- `/devex-review` — Live DX audit
-- `/careful` — Safety guardrails for destructive commands
-- `/freeze` — Restrict edits to specific directory
-- `/guard` — Full safety mode
-- `/unfreeze` — Clear freeze boundary
-- `/gstack-upgrade` — Upgrade gstack
-- `/learn` — Manage project learnings
-- `/autopilot` — Full gstack session orchestrator (idea to shipped product)
-
+`mcp__claude-in-chrome__*` is the fallback when you need the user's own logged-in
+Chrome session rather than a fresh browser.
 
 # Global Claude Code memory
 

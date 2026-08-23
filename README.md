@@ -7,7 +7,7 @@ My global Claude Code configuration. Everything needed to reproduce my exact set
 ```
 claude-config/
 ├── settings.json              # Permissions, hooks, plugins, thinking toggle
-├── CLAUDE.md                  # Global instructions (gstack skills, agent house style)
+├── CLAUDE.md                  # Global instructions (browsing, agent house style)
 ├── agents/                    # Domain agents + vendored review specialists
 │   ├── backend.md             # Server-side logic, APIs, services
 │   ├── frontend.md            # Client/UI code, components, pages
@@ -115,15 +115,17 @@ claude plugins install ui-ux-pro-max@ui-ux-pro-max-skill
 claude plugins install frontend-design@claude-plugins-official
 ```
 
-> **No ECC plugin, no GSD.** Both were removed after a usage audit — see
-> [Removed: ECC and GSD](#removed-ecc-and-gsd). The three ECC pieces actually
-> used are vendored into this repo and install with Step 4.
+> **No ECC plugin, no GSD, no gstack.** All three were removed after a usage
+> audit — see [Removed: ECC, GSD, and gstack](#removed-ecc-gsd-and-gstack). The
+> ECC pieces actually used are vendored into this repo and install with Step 4.
 
 ### Step 3: Configure MCP servers
 
-Add the Obsidian MCP server (required by `/learn-obsidian` and `/obsidian` skills):
-
 ```bash
+# Browser automation — navigation, screenshots, console/network, Lighthouse
+claude mcp add chrome-devtools --scope user -- npx -y chrome-devtools-mcp@latest
+
+# Obsidian vault (required by /learn-obsidian and /obsidian)
 claude mcp add obsidian -- npx @bitbonsai/mcpvault@latest "/path/to/your/obsidian/vault"
 ```
 
@@ -222,13 +224,12 @@ Review side:
 | Source | Skills | Install Method |
 |--------|--------|----------------|
 | **This repo** | `/pick-up`, `/learn-obsidian`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/to-pr-plan`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out`, `/ecc-code-review`, `/ecc-review-pr`, `/strategic-compact` + 15 agents | Copy to `~/.claude/` |
-| **gstack** | `/browse`, `/ship`, `/review`, `/qa`, `/codex`, `/autopilot`, etc. | External installer (`~/.agents/skills/gstack`) |
 | **Caveman** | `/caveman`, `/caveman-commit`, `/caveman-review` | `marketplace add` + `install` |
 | **Matt Pocock skills** | `/setup-matt-pocock-skills` and friends | External — see [mattpocock/skills](https://github.com/mattpocock/skills) |
 
-## Removed: ECC and GSD
+## Removed: ECC, GSD, and gstack
 
-Both were removed on 2026-08-24 after auditing 608 session transcripts for
+All three were removed on 2026-08-24 after auditing 608 session transcripts for
 actual invocations (`<command-name>`, `Skill` tool, `subagent_type`).
 
 **GSD (`get-shit-done`) — removed entirely.** Zero invocations, ever: 0 of 67
@@ -259,6 +260,27 @@ be partially trimmed, so the used pieces were copied into this repo instead:
   wired in `settings.json` (it never was); add a PreToolUse `Edit|Write` entry
   if you want the automatic nudge.
 
+**gstack — removed entirely.** 3 invocations ever, all `/browse`, out of 47
+skills. Zero `/ship`, `/review`, `/qa`, `/codex`, `/autopilot`, `/design-*`,
+`/office-hours`, `/canary`, `/retro`, `/cso`, `/investigate`, `/careful`,
+`/guard`. It cost ~5,852 tokens of context per session for the skill listing,
+plus ~672 more for the hand-written duplicate of that listing in `CLAUDE.md`
+(which loaded twice in this repo, since the user and project copies are
+identical), and **2.0 GB** on disk — two byte-identical copies of gstack 1.26.3.0
+at `~/.claude/skills/gstack` and `~/.agents/skills/gstack`, 703 MB of
+`node_modules` each.
+
+Removed: 48 skill stubs from `~/.claude/skills/`, 48 from `~/.agents/skills/`,
+both payload trees, and the gstack block in `CLAUDE.md`. Preserved in
+`~/.agents/skills/`: `caveman`, `learned`, `easypg-pre-deploy-branch-check`,
+`setup-matt-pocock-skills`, and the `source-command-*` originals.
+
+Browsing moved to the `chrome-devtools` MCP, added standalone
+(`claude mcp add chrome-devtools --scope user -- npx -y chrome-devtools-mcp@latest`)
+because the previous one came from the ECC plugin and went with it.
+`~/.claude/daemon*` and `homunculus/` were left alone — that is Claude Code's own
+auth supervisor, not gstack's browse daemon.
+
 Also cleaned up: 10 broken symlinks in `~/.claude/skills/` (`diagnose`,
 `grill-me`, `grill-with-docs`, `improve-codebase-architecture`, `tdd`,
 `to-issues`, `to-prd`, `triage`, `write-a-skill`, `zoom-out`) that pointed at a
@@ -270,7 +292,7 @@ nameless entries in the skill listing.
 
 These are managed elsewhere or are transient — don't version them:
 
-- `~/.claude/skills/gstack/` and `~/.agents/skills/` — gstack, external installer
+- `~/.agents/skills/source-command-*` — upstream sources for the Matt Pocock commands
 - `~/.claude/plugins/` — Plugin cache/data (managed by `claude plugins`)
 - `~/.claude/sessions/`, `session-data/`, `history.jsonl` — Personal session data
 
