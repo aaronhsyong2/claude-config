@@ -304,8 +304,8 @@ Write report to `.claude/PRPs/reports/{plan-name}-report.md`:
 | `path/to/test` | N tests | [area covered] |
 
 ## Next Steps
-- [ ] Code review via `/review-pr`
-- [ ] Create PR via `/prp-pr`
+- [ ] Code review via `/ecc-review-pr`
+- [ ] Create PR via `gh pr create`
 ```
 
 ### Update PRD (if applicable)
@@ -373,7 +373,7 @@ Report to user:
 | Phase 2 | [next] |
 | ... | ... |
 
-> Next step: Run `/review-pr` to review changes, or `/prp-pr` to create a pull request.
+> Next step: Run `/ecc-review-pr` to review changes, or `gh pr create` to open a pull request.
 ```
 
 ---
@@ -429,7 +429,7 @@ Report to user:
 
 ## Next Steps
 
-- Run `/review-pr` to review changes
-- Run `/prp-commit` to commit with a descriptive message
-- Run `/prp-pr` to create a pull request
+- Run `/ecc-review-pr` to review changes
+- Run `git commit` with a descriptive message (see rules/common/git-workflow.md)
+- Run `gh pr create` to open a pull request
 - Run `/prp-plan-team <next-phase>` if the PRD has more phases

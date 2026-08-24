@@ -574,5 +574,5 @@ A developer unfamiliar with this codebase should be able to implement the featur
 
 - Run `/prp-implement-team <plan-path>` to execute this plan with domain agents
 - Run `/plan` for quick conversational planning without artifacts
-- Run `/prp-prd` to create a PRD first if scope is unclear
+- Run `/to-spec` to synthesize a spec first if scope is unclear
 ````

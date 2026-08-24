@@ -36,7 +36,7 @@ If no agent brief exists, ask the user whether to proceed with just the issue bo
 
 ### 4. Check blockers
 
-Read the issue body for a "Blocked by" section (added by `/to-issues`). If blockers exist, check whether blocking issues are closed/resolved. If any are still open, warn the user and ask whether to proceed anyway.
+Read the issue body for a "Blocked by" section (added by `/to-tickets`). If blockers exist, check whether blocking issues are closed/resolved. If any are still open, warn the user and ask whether to proceed anyway.
 
 ### 5. Route
 

@@ -6,14 +6,14 @@ How `/pick-up` maps triaged issues to downstream workflows.
 
 | Category | State | Route | Why |
 |----------|-------|-------|-----|
-| `bug` | `ready-for-agent` | `/diagnose` | Self-contained 6-phase loop: feedback loop → reproduce → hypothesize → instrument → fix → regression test. Runs autonomously. |
-| `bug` | `ready-for-human` | `/diagnose` | Same loop. Agent pauses at checkpoints needing human input (environment access, design judgment, manual testing). |
+| `bug` | `ready-for-agent` | `/diagnosing-bugs` | Self-contained diagnosis loop: tight feedback loop → minimise → hypothesise → instrument → fix → regression test. Runs autonomously. |
+| `bug` | `ready-for-human` | `/diagnosing-bugs` | Same loop. Agent pauses at checkpoints needing human input (environment access, design judgment, manual testing). |
 | `enhancement` | `ready-for-agent` | `/prp-plan-team` → `/prp-implement-team` | Agent brief has clear acceptance criteria and scope. PRP captures codebase patterns, plans with agent tags, delegates to domain agents. No questions needed. |
-| `enhancement` | `ready-for-human` | `/feature-dev` | Triage flagged judgment calls needed. Feature-dev's interactive phases (discover → explore → clarify → architecture → implement) resolve ambiguity before committing to code. |
+| `enhancement` | `ready-for-human` | `/grill-with-docs` → `/prp-plan-team` | Triage flagged judgment calls needed. Grilling resolves the ambiguity by interview and leaves the paper trail in `CONTEXT.md` and `docs/decisions/`; the sharpened brief then plans as normal. |
 
 ## What to Pass to Each Route
 
-### `/diagnose`
+### `/diagnosing-bugs`
 
 Pass as context:
 - Agent brief summary
@@ -35,7 +35,7 @@ After `/prp-plan-team` produces a plan file:
 2. Wait for user confirmation
 3. Invoke `/prp-implement-team <plan-path>`
 
-### `/feature-dev`
+### `/grill-with-docs` → `/prp-plan-team`
 
 Pass as context:
 - Full agent brief
@@ -43,7 +43,7 @@ Pass as context:
 - Acceptance criteria
 - Out of scope
 
-Feature-dev will handle its own exploration and questioning phases.
+`/grill-with-docs` runs the interview to settle the judgment calls, updating `CONTEXT.md` and `docs/decisions/` inline as decisions crystallise. When the tree is resolved, hand the sharpened brief to `/prp-plan-team` exactly as in the `ready-for-agent` route above.
 
 ## Decision Signals
 
@@ -73,15 +73,20 @@ When the routing table is ambiguous, use these signals to decide.
 This skill sits at the end of the idea-to-implementation pipeline:
 
 ```
-/grill-me        → stress-test the idea (conversation)
-/to-prd          → synthesize into PRD (GitHub issue)
-/to-issues       → break into vertical slices (GitHub issues)
-/triage          → classify + write agent brief (labels + comment)
+/grill-with-docs → stress-test the idea, update CONTEXT.md + ADRs
+/to-spec         → synthesize into a spec (tracker issue)
+/to-tickets      → break into tracer-bullet tickets with blocking edges
+/to-pr-plan      → group tickets into PR batches
 /pick-up #N      → route to right workflow (this skill)
-  ├── bug        → /diagnose
+  ├── bug        → /diagnosing-bugs
   └── enhancement
       ├── clear  → /prp-plan-team → /prp-implement-team
-      └── unclear → /feature-dev
+      └── unclear → /grill-with-docs → /prp-plan-team
+
+/triage is NOT in this chain. It is the on-ramp for issues you did not
+create - inbound bugs and feature requests - which it turns into
+agent-ready issues that /pick-up then routes. Tickets produced by
+/to-tickets are already agent-ready; do not triage them.
 ```
 
 ## Extending This Table

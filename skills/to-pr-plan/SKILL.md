@@ -7,11 +7,15 @@ description: Group issues from an epic into PR batches with dependency ordering 
 
 Group issues from an epic into logical PR batches. Interactive — proposes groupings, user refines, skill writes the plan via `/project-docs`.
 
-This skill sits between `/to-issues` and `/triage` in the pipeline:
+This skill sits between `/to-tickets` and `/pick-up` in the pipeline:
 
 ```
-/grill-me → /to-prd → /to-issues → /to-pr-plan → /triage → /pick-up
+/grill-with-docs → /to-spec → /to-tickets → /to-pr-plan → /pick-up
 ```
+
+`/triage` is deliberately not in this chain: it is the on-ramp for issues you
+did not create (inbound bugs, feature requests). Tickets `/to-tickets` produced
+already carry `ready-for-agent`, so they go straight to `/pick-up`.
 
 See [FORMAT.md](FORMAT.md) for the PR plan document format (contract with the orchestrator).
 See [SOURCES.md](SOURCES.md) for supported issue sources and configuration.
@@ -79,7 +83,7 @@ Ask the user:
 - Are there issues that should be standalone instead of grouped?
 - Any groups that should be reordered?
 
-Iterate until the user approves. This step is HIGH interaction — similar to `/grill-me`.
+Iterate until the user approves. This step is HIGH interaction — similar to `/grilling`.
 
 ### 6. Confirm branch names
 
