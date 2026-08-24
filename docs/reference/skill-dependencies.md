@@ -1,196 +1,166 @@
 ---
-title: "Orchestrator Skill Dependencies"
+title: "Skill Dependencies"
 category: reference
 tags:
-  - orchestrator
   - skills
   - dependencies
-  - fork-tracking
+  - pipeline
 created: 2026-05-02
-updated: 2026-05-02
+updated: 2026-08-24
 status: active
 related:
   - "[Claude Orchestrator PRD](../guide/claude-orchestrator-prd.md)"
 ---
 
-# Orchestrator Skill Dependencies
+# Skill Dependencies
 
-Comprehensive list of skills the orchestrator pipeline relies on, their source, and fork status.
+What the workflow pipeline relies on, where each piece comes from, and what depends on what.
+
+Nothing here is specific to a particular repo. Every skill reads its per-repo
+configuration from `docs/agents/` (see [Prerequisite](#prerequisite)), so the
+same set works across any project.
 
 ## Pipeline Overview
 
 ```
-/setup-matt-pocock-skills  (prerequisite — configures issue tracker, labels, domain docs)
+/setup-matt-pocock-skills   (prerequisite — run once per repo)
         │
-/grill-me → /to-prd → /to-issues → /to-pr-plan → /triage → /pick-up
-                                                                 │
-                    ┌────────────────────────────────────────────┘
-                    ├── /diagnose          (bugs)
-                    ├── /prp-plan          (clear enhancements)
-                    ├── /prp-implement     (execute plan)
-                    ├── /feature-dev       (unclear enhancements)
-                    ├── /tdd              (test-driven development)
-                    ├── /code-review       (post-implementation)
-                    └── /prp-pr            (create PR)
+/grill-with-docs → /to-spec → /to-tickets → /to-pr-plan → /pick-up
+                                                              │
+                    ┌─────────────────────────────────────────┘
+                    ├── bug          → /diagnosing-bugs
+                    └── enhancement
+                        ├── clear    → /prp-plan-team → /prp-implement-team
+                        └── unclear  → /grill-with-docs → /prp-plan-team
+                                                              │
+                                          /ecc-review-pr ─────┘
 ```
 
-## Prerequisites
+`/triage` is deliberately **not** in this chain. It is the on-ramp for issues
+you did *not* create — inbound bug reports and feature requests — which it turns
+into agent-ready issues that `/pick-up` then routes. Tickets produced by
+`/to-tickets` already carry `ready-for-agent`, so triaging them is redundant.
 
-### /setup-matt-pocock-skills
+## Prerequisite
 
-**Source:** `mattpocock/skills` (GitHub) — install via `npx skills@latest add mattpocock/skills`
-**Status:** NOT INSTALLED — must be added to `~/.claude/commands/` or `claude-config`
+### `/setup-matt-pocock-skills`
 
-This skill is a **prerequisite** for all Matt Pocock skills to function. Without it, skills like `/to-prd`, `/to-issues`, and `/triage` fail because they don't know what labels to use or where the issue tracker is.
+Still external — symlinked from `~/.agents/skills/`, not vendored into this repo.
 
-**What it configures (per project):**
+Configures three things per repo, written to `docs/agents/`:
 
-1. **Issue Tracker Selection**
-   - GitHub Issues (default), GitLab Issues, local markdown files (`.scratch/`), or custom
-   - Examines git remotes and repo structure to propose defaults
+- **Issue tracker** — GitHub (`gh` CLI), GitLab, or local markdown under `.scratch/`
+- **Triage labels** — maps the five canonical roles to this repo's label strings
+- **Domain docs** — where `CONTEXT.md` and ADRs live
 
-2. **Triage Label Vocabulary**
-   - Maps 5 canonical states to actual repo label names:
+`/to-spec`, `/to-tickets`, `/triage`, and `/wayfinder` all read this config and
+will tell the user to run setup if it is missing. The skills themselves are
+tracker-agnostic.
 
-   | Canonical State | Purpose | Default Label |
-   |----------------|---------|---------------|
-   | `needs-triage` | Initial evaluation required | `needs-triage` |
-   | `needs-info` | Waiting on reporter | `needs-info` |
-   | `ready-for-agent` | Fully specified for automated agent | `ready-for-agent` |
-   | `ready-for-human` | Requires human implementation | `ready-for-human` |
-   | `wontfix` | Will not receive action | `wontfix` |
+> **Note:** setup writes to `docs/agents/`. If a repo already uses that path for
+> something else, point setup elsewhere before running it.
 
-   Category labels also needed: `bug`, `enhancement`
+## Triage Label Vocabulary
 
-3. **Domain Documentation Layout**
-   - Single-context: One `CONTEXT.md` + `docs/adr/` at root
-   - Multi-context: `CONTEXT-MAP.md` pointing to distributed contexts (monorepos)
+Shared contract between `/triage`, `/to-tickets`, and `/pick-up`. All three use
+the same five roles, so no translation layer is needed:
 
-**Output files written to target project:**
-- `docs/agents/issue-tracker.md` — which tracker to use and how
-- `docs/agents/triage-labels.md` — label mapping table
-- `docs/agents/domain.md` — documentation layout config
-- `## Agent skills` block in `CLAUDE.md` or `AGENTS.md`
+| Role | Meaning |
+|------|---------|
+| `needs-triage` | Maintainer needs to evaluate this |
+| `needs-info` | Waiting on the reporter |
+| `ready-for-agent` | Fully specified, ready for an AFK agent |
+| `ready-for-human` | Requires human implementation |
+| `wontfix` | Will not be actioned |
 
-**Supporting docs included in the skill:**
-- `issue-tracker-github.md` — GitHub-specific conventions using `gh` CLI
-- `issue-tracker-gitlab.md` — GitLab configuration
-- `issue-tracker-local.md` — Local markdown file setup (uses `.scratch/` directory)
-
-**Key insight:** Matt Pocock skills DO support local issue tracking — but only when this setup skill configures it. The skills themselves are tracker-agnostic; they read from `docs/agents/issue-tracker.md` to know where to publish.
-
-**Action required:** Install this skill and run it on each project repo before using `/to-prd`, `/to-issues`, or `/triage`. For leadforge-project, this means creating the 5 triage labels on GitHub and generating the `docs/agents/` config files.
+`/to-tickets` applies `ready-for-agent` on publish. `/pick-up` routes on the
+`category` + `state` pair.
 
 ## Skills by Source
 
-### Local — Claude Config (owned, no fork needed)
+### Owned — written here
 
-| Skill | Path | Pipeline Step | Notes |
-|-------|------|---------------|-------|
-| `/pick-up` | `skills/pick-up/` | Route triaged issue to workflow | Routes to downstream skills |
-| `/to-pr-plan` | `skills/to-pr-plan/` | Group issues into PR batches | NEW — created for orchestrator |
-| `/project-docs` | `skills/project-docs/` | Write documentation | Used by `/to-pr-plan` to persist PR plans |
-| `/plan-tasks` | `skills/plan-tasks/` | Break work into tasks | Pi orchestrator support |
-| `/learn` | `skills/learn/` | Save learnings to Obsidian | Not in orchestrator pipeline |
-| `/obsidian` | `skills/obsidian/` | Manage Obsidian notes | Not in orchestrator pipeline |
+| Skill | Path | Pipeline Step |
+|-------|------|---------------|
+| `/pick-up` | `skills/pick-up/` | Route a triaged issue to the right workflow |
+| `/to-pr-plan` | `skills/to-pr-plan/` | Group tickets into PR batches |
+| `/project-docs` | `skills/project-docs/` | Write documentation (used by `/to-pr-plan`) |
+| `/plan-tasks` | `skills/plan-tasks/` | Break work into orchestrator tasks |
+| `/learn-obsidian` | `skills/learn-obsidian/` | Save learnings (outside the pipeline) |
+| `/obsidian` | `skills/obsidian/` | Manage notes (outside the pipeline) |
+| `/prp-plan-team` | `commands/prp-plan-team.md` | Agent-aware planning |
+| `/prp-implement-team` | `commands/prp-implement-team.md` | Orchestrated execution |
+| `/write-a-skill` | `commands/write-a-skill.md` | Author new skills |
+| `/zoom-out` | `commands/zoom-out.md` | Step back and reassess |
 
-### Matt Pocock — External (need to fork)
+`/write-a-skill` and `/zoom-out` were dropped upstream and are fully owned here.
 
-**Source repo:** `mattpocock/skills` — install via `npx skills@latest add mattpocock/skills`
+### Vendored from `mattpocock/skills` @ `5b15a47`
 
-| Skill | Path | Pipeline Step | Fork Priority | Notes |
-|-------|------|---------------|---------------|-------|
-| `/setup-matt-pocock-skills` | NOT INSTALLED | Prerequisite for all below | CRITICAL — install immediately | Configures issue tracker, labels, domain docs |
-| `/grill-me` | `commands/grill-me.md` | Stress-test ideas | LOW — interactive | N/A (conversation) |
-| `/grill-with-docs` | `commands/grill-with-docs.md` | Grill with doc context | LOW — interactive | N/A (conversation) |
-| `/to-prd` | `commands/to-prd.md` | Convert context to PRD | HIGH — creates epic issue | Tracker-agnostic, reads `docs/agents/issue-tracker.md` |
-| `/to-issues` | `commands/to-issues.md` | Break PRD into issues | HIGH — creates work items | Tracker-agnostic, reads `docs/agents/issue-tracker.md` |
-| `/triage` | `commands/triage.md` | Classify + write agent brief | HIGH — gates execution | Reads `docs/agents/triage-labels.md` for label names |
-| `/tdd` | `commands/tdd.md` | Test-driven development | MED — used during implementation | N/A (code-level) |
-| `/diagnose` | `commands/diagnose.md` | Debug hard bugs | LOW — on-demand | N/A (code-level) |
-| `/write-a-skill` | `commands/write-a-skill.md` | Create new skills | LOW — meta-tool | N/A |
-| `/improve-codebase-architecture` | `commands/improve-codebase-architecture.md` | Architecture improvements | LOW — on-demand | N/A |
-| `/zoom-out` | `commands/zoom-out.md` | Step back, reassess | LOW — on-demand | N/A |
+Forked on 2026-08-24 — **no longer external, safe to modify**. See the
+[Removed](../../README.md) section of the README for the audit that preceded it.
 
-### ECC Plugin — Everything Claude Code (need to fork)
+| Skill | Role |
+|-------|------|
+| `/triage` | Issue state machine, agent-ready briefs |
+| `/to-spec` | Conversation → spec on the tracker |
+| `/to-tickets` | Spec → tracer-bullet tickets with blocking edges |
+| `/diagnosing-bugs` | Feedback-loop-first diagnosis |
+| `/grill-with-docs` | Interview + domain model (shim over the next two) |
+| `/grilling` | The interview primitive |
+| `/domain-modeling` | `CONTEXT.md` glossary + ADRs |
+| `/codebase-design` | Deep-module vocabulary |
+| `/improve-codebase-architecture` | Deepening survey → HTML report |
+| `/tdd` | Red-green-refactor |
+| `/wayfinder` | Multi-session work as decision tickets |
+| `/prototype` | Throwaway artifact to settle a design question |
+| `/research` | Background agent → cited markdown |
+| `/resolving-merge-conflicts` | Resolve by intent, never `--abort` |
+| `/writing-for-agents` | Writing skills, `AGENTS.md`, `CLAUDE.md` |
 
-| Skill | Plugin Path | Pipeline Step | Fork Priority | Notes |
-|-------|-------------|---------------|---------------|-------|
-| `/prp-plan` | ECC plugin | Plan implementation | HIGH — primary planning route | Called by `/pick-up` for clear enhancements |
-| `/prp-implement` | ECC plugin | Execute plan | HIGH — primary execution route | Called after `/prp-plan` |
-| `/code-review` | ECC plugin | Review code | HIGH — post-implementation gate | Called before PR creation |
-| `/prp-pr` | ECC plugin | Create PR | HIGH — final pipeline step | Creates branch + PR on GitHub |
-| `/feature-dev` | ECC plugin | Interactive feature dev | MED — alternate route for unclear work | Called by `/pick-up` for human-needed items |
-| `/build-fix` | ECC plugin | Fix build errors | MED — used during verification | Agent self-fix on build failures |
+**Deliberate divergence from upstream:** `domain-modeling/ADR-FORMAT.md` is
+repointed at `docs/decisions/` with three-digit numbering and the frontmatter
+defined in `rules/common/documentation.md`. Codex-only `agents/openai.yaml` is
+stripped from every skill. `ask-matt` is not adopted — it hard-references skills
+that were not taken.
 
-### ECC Plugin — Hooks (need to disable or replace)
+### Vendored from the ECC plugin
 
-| Hook ID | Action | Orchestrator Impact | Resolution |
-|---------|--------|---------------------|------------|
-| `pre:edit-write:gateguard-fact-force` | BLOCK | Stops autonomous writes | `ECC_GATEGUARD=off` |
-| `pre:bash:dispatcher` | BLOCK (conditional) | May block bash commands | `ECC_HOOK_PROFILE=minimal` |
-| `pre:config-protection` | BLOCK | Blocks config file edits | `ECC_HOOK_PROFILE=minimal` |
-| `pre:mcp-health-check` | BLOCK (conditional) | Blocks unhealthy MCP calls | `ECC_HOOK_PROFILE=minimal` |
-| `post:quality-gate` | Advisory | Adds noise in autonomous mode | `ECC_HOOK_PROFILE=minimal` |
-| `post:edit:design-quality-check` | Advisory | Irrelevant for backend refactors | `ECC_HOOK_PROFILE=minimal` |
-| PostToolUse prettier hook | Format | Conflicts with Biome projects | Replace with project-defined formatting |
+The plugin itself was removed; only the parts in actual use were kept.
 
-### ECC Plugin — Agents (evaluate for fork)
+| Item | Path |
+|------|------|
+| `/ecc-code-review` | `commands/ecc-code-review.md` |
+| `/ecc-review-pr` | `commands/ecc-review-pr.md` |
+| `/strategic-compact` | `skills/strategic-compact/` |
+| 10 review agents | `agents/` — see README |
 
-| Agent | Used By | Fork Priority | Notes |
-|-------|---------|---------------|-------|
-| `code-reviewer` | Post-implementation review | MED | May want custom review criteria |
-| `build-error-resolver` | Verification failures | MED | Useful for agent self-fix |
-| `security-reviewer` | Pre-commit checks | LOW | Nice to have, not blocking |
+Prefixed `ecc-` because bare `code-review` collides with the built-in
+`/code-review`.
 
-## Fork Roadmap
+## Inter-Skill Dependencies
 
-### Phase 0: Immediate Fix
+Skills that call other skills via the Skill tool. Removing a dependency breaks
+the caller, not just degrades it.
 
-Install `/setup-matt-pocock-skills` and run it on leadforge-project to create labels and config files.
+| Caller | Requires | Why |
+|--------|----------|-----|
+| `/grill-with-docs` | `/grilling`, `/domain-modeling` | It is a 7-line shim over both |
+| `/improve-codebase-architecture` | `/codebase-design`, `/grilling`, `/domain-modeling` | Architecture vocabulary + the interview |
+| `/wayfinder` | `/prototype`, `/research`, `/grilling` | Three of its four ticket types |
+| `/pick-up` | `/diagnosing-bugs`, `/prp-plan-team`, `/grill-with-docs` | Its routing targets |
+| `/to-pr-plan` | `/project-docs` | Persists the PR plan document |
+
+`/improve-codebase-architecture` also reads `CONTEXT.md` and `docs/decisions/`.
+It degrades in a repo that has neither, so seed them before relying on it.
+
+## Verification
+
+To confirm no skill points at something that does not exist:
 
 ```bash
-npx skills@latest add mattpocock/skills
-# Then in Claude Code on the leadforge project:
-/setup-matt-pocock-skills
+# every /slash-command referenced anywhere in the repo
+grep -rhoE '/[a-z][a-z0-9-]{2,}' skills commands --include='*.md' | sort -u
 ```
 
-### Phase 1: Orchestrator MVP
-
-Disable ECC hooks via environment variables. No forking needed yet.
-
-```bash
-ECC_HOOK_PROFILE=minimal
-ECC_GATEGUARD=off
-```
-
-### Phase 2: Core Pipeline Fork (HIGH priority)
-
-Fork into `claude-config` to remove external dependency for execution:
-
-1. `/setup-matt-pocock-skills` → `skills/setup-project/` (rename, generalize)
-2. `/to-prd` → `skills/to-prd/` (add local mode adapter)
-3. `/to-issues` → `skills/to-issues/` (add local mode adapter)
-4. `/triage` → `skills/triage/` (add local mode adapter)
-5. `/prp-plan` → `skills/prp-plan/`
-6. `/prp-implement` → `skills/prp-implement/`
-7. `/code-review` → `skills/code-review/`
-8. `/prp-pr` → `skills/prp-pr/`
-
-### Phase 3: Extended Fork (MED priority)
-
-Fork for completeness and customization:
-
-1. `/feature-dev` → `skills/feature-dev/`
-2. `/build-fix` → `skills/build-fix/`
-3. `/tdd` → `skills/tdd/` (already local, move to skills/ structure)
-4. `code-reviewer` agent → `agents/code-reviewer/`
-5. `build-error-resolver` agent → `agents/build-error-resolver/`
-
-### Phase 4: Full Independence (LOW priority)
-
-Fork remaining Matt Pocock skills and remove ECC plugin entirely:
-
-1. `/grill-me`, `/grill-with-docs`, `/diagnose`, `/zoom-out`
-2. Remove ECC from `enabledPlugins` in settings.json
-3. Replace any remaining ECC hooks with local equivalents
+Cross-check that list against `ls commands/` and `ls -d skills/*/`.

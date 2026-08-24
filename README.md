@@ -302,8 +302,8 @@ at `~/.claude/skills/gstack` and `~/.agents/skills/gstack`, 703 MB of
 
 Removed: 48 skill stubs from `~/.claude/skills/`, 48 from `~/.agents/skills/`,
 both payload trees, and the gstack block in `CLAUDE.md`. Preserved in
-`~/.agents/skills/`: `caveman`, `learned`, `easypg-pre-deploy-branch-check`,
-`setup-matt-pocock-skills`, and the `source-command-*` originals.
+`~/.agents/skills/`: `caveman`, `learned`, `setup-matt-pocock-skills`, the
+`source-command-*` originals, and one machine-local work skill not tracked here.
 
 Browsing moved to the `chrome-devtools` MCP, added standalone
 (`claude mcp add chrome-devtools --scope user -- npx -y chrome-devtools-mcp@latest`)

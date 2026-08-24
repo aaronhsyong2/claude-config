@@ -16,7 +16,7 @@ related: []
 
 ## Problem Statement
 
-The developer has a mature workflow pipeline (grill-me → PRD → issues → PR plan → triage → pick-up → implement → review) that produces high-quality results. However, once work reaches the execution phase, there is no way to run multiple agents concurrently with visibility. Each agent session requires manual babysitting for permission prompts (primarily from the ECC GateGuard hook), and there is no dashboard to monitor progress across parallel workstreams. The developer trusts the pipeline enough that ~90% of implementation completes without intervention, but has no tooling to leverage that trust at scale.
+The developer has a mature workflow pipeline (grill → spec → tickets → PR plan → pick-up → implement → review) that produces high-quality results. However, once work reaches the execution phase, there is no way to run multiple agents concurrently with visibility. Each agent session requires manual babysitting for permission prompts, and there is no dashboard to monitor progress across parallel workstreams. The developer trusts the pipeline enough that ~90% of implementation completes without intervention, but has no tooling to leverage that trust at scale.
 
 ## Solution
 
@@ -75,7 +75,7 @@ Additionally, create a `/to-pr-plan` skill that bridges the gap between issue cr
 - **One git worktree per PR group** — lives until PR merged or abandoned
 - **One `claude --headless` session per issue** — fresh context, no carryover between issues
 - **Issue prompt:** Full issue body from GitHub, injected as the initial prompt
-- **Environment:** `ECC_HOOK_PROFILE=minimal` or `ECC_GATEGUARD=off` to disable blocking hooks
+- **Environment:** blocking hooks disabled for autonomous runs (see Hook Configuration)
 - **CWD:** Worktree path, preventing writes to main repo
 
 ### Execution Flow Per PR Group
@@ -157,7 +157,7 @@ Per-project `.orchestrator/config.json`:
   "max_retries_on_fail": 2,
   "max_concurrent_agents": 3,
   "pr_plan_glob": "docs/guide/*-pr-plan.md",
-  "github_repo": "ay-development-org/leadforge-project"
+  "github_repo": "<org>/<repo>"
 }
 ```
 
@@ -185,10 +185,11 @@ Standard format in `docs/guide/*-pr-plan.md`, parseable by orchestrator:
 
 ### Hook Configuration for Autonomous Agents
 
-- ECC plugin hooks disabled via environment: `ECC_HOOK_PROFILE=minimal`
-- GateGuard specifically: `ECC_GATEGUARD=off`
-- Local GSD hooks (sensitive-path-guard, validate-commit) remain active
-- Prettier/Biome formatting handled by project verify commands, not global hooks
+- Any hook that blocks on interactive confirmation must be disabled for
+  autonomous runs — an AFK agent cannot answer a prompt
+- `sensitive-path-guard` stays active: it blocks writes to `.env`, `.ssh`, and
+  credential files, which is exactly the guarantee autonomy needs
+- Formatting handled by project verify commands, not global hooks
 
 ### Skill Dependencies
 
