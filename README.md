@@ -27,16 +27,8 @@ claude-config/
 ├── commands/                  # Slash commands (user-owned)
 │   ├── prp-plan-team.md       # Agent-aware planning (fork of /prp-plan)
 │   ├── prp-implement-team.md  # Orchestrator delegation (fork of /prp-implement)
-│   ├── grill-me.md            # Stress-test an idea
-│   ├── grill-with-docs.md     # Grill against existing docs
-│   ├── to-prd.md              # Synthesize conversation into PRD
-│   ├── to-issues.md           # Break PRD into vertical slice issues
-│   ├── triage.md              # Classify + write agent brief
-│   ├── diagnose.md            # 6-phase bug diagnosis loop
-│   ├── tdd.md                 # Test-driven development
-│   ├── improve-codebase-architecture.md
-│   ├── write-a-skill.md       # Create new agent skills
-│   ├── zoom-out.md            # Step back and reassess
+│   ├── write-a-skill.md       # Create new agent skills (dropped upstream, ours now)
+│   ├── zoom-out.md            # Step back and reassess (dropped upstream, ours now)
 │   ├── ecc-code-review.md     # Local diff / PR review (vendored from ECC)
 │   └── ecc-review-pr.md       # Multi-agent PR review (vendored from ECC)
 ├── rules/
@@ -78,10 +70,46 @@ claude-config/
 │   │   └── TEMPLATES.md       # Frontmatter templates per category
 │   ├── strategic-compact/
 │   │   └── SKILL.md           # Compact at logical boundaries (vendored from ECC)
-│   └── to-pr-plan/
-│       ├── SKILL.md           # Group epic issues into PR batches
-│       ├── FORMAT.md
-│       └── SOURCES.md
+│   ├── to-pr-plan/
+│   │   ├── SKILL.md           # Group epic issues into PR batches
+│   │   ├── FORMAT.md
+│   │   └── SOURCES.md
+│   │
+│   │                          # --- vendored from mattpocock/skills @ 5b15a47 ---
+│   ├── triage/                # Issue state machine + agent-ready briefs
+│   │   ├── SKILL.md
+│   │   ├── AGENT-BRIEF.md
+│   │   └── OUT-OF-SCOPE.md
+│   ├── to-spec/               # Conversation -> spec on the issue tracker
+│   ├── to-tickets/            # Spec -> tracer-bullet tickets with blocking edges
+│   ├── diagnosing-bugs/       # Feedback-loop-first diagnosis (+ scripts/)
+│   ├── grill-with-docs/       # 7-line shim: grilling + domain-modeling
+│   ├── grilling/              # The interview primitive (rounds, frontier)
+│   ├── domain-modeling/       # CONTEXT.md glossary + ADRs
+│   │   ├── SKILL.md
+│   │   ├── ADR-FORMAT.md      # PATCHED: docs/decisions/, 3-digit, our frontmatter
+│   │   └── CONTEXT-FORMAT.md
+│   ├── codebase-design/       # Deep-module vocabulary (module/interface/seam)
+│   │   ├── SKILL.md
+│   │   ├── DEEPENING.md
+│   │   └── DESIGN-IT-TWICE.md
+│   ├── improve-codebase-architecture/
+│   │   ├── SKILL.md           # Deepening survey -> HTML report -> grill
+│   │   └── HTML-REPORT.md
+│   ├── tdd/                   # Red-green-refactor
+│   │   ├── SKILL.md
+│   │   ├── mocking.md
+│   │   └── tests.md
+│   ├── wayfinder/             # Multi-session work as decision tickets
+│   ├── prototype/             # Throwaway artifact to settle a design question
+│   │   ├── SKILL.md
+│   │   ├── LOGIC.md
+│   │   └── UI.md
+│   ├── research/              # Background agent -> cited markdown in repo
+│   ├── resolving-merge-conflicts/   # Resolve by intent, never --abort
+│   └── writing-for-agents/    # Writing skills, AGENTS.md, CLAUDE.md
+│       ├── SKILL.md
+│       └── SKILL-MECHANICS.md
 └── LICENSE
 ```
 
@@ -223,9 +251,11 @@ Review side:
 
 | Source | Skills | Install Method |
 |--------|--------|----------------|
-| **This repo** | `/pick-up`, `/learn-obsidian`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/to-pr-plan`, `/grill-me`, `/grill-with-docs`, `/to-prd`, `/to-issues`, `/triage`, `/tdd`, `/diagnose`, `/prp-plan-team`, `/prp-implement-team`, `/improve-codebase-architecture`, `/write-a-skill`, `/zoom-out`, `/ecc-code-review`, `/ecc-review-pr`, `/strategic-compact` + 15 agents | Copy to `~/.claude/` |
+| **This repo (own)** | `/pick-up`, `/learn-obsidian`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/to-pr-plan`, `/prp-plan-team`, `/prp-implement-team`, `/write-a-skill`, `/zoom-out` + 15 agents | Copy to `~/.claude/` |
+| **This repo (vendored, ECC)** | `/ecc-code-review`, `/ecc-review-pr`, `/strategic-compact` | Copy to `~/.claude/` |
+| **This repo (vendored, Matt Pocock)** | `/triage`, `/to-spec`, `/to-tickets`, `/diagnosing-bugs`, `/grill-with-docs`, `/grilling`, `/domain-modeling`, `/codebase-design`, `/improve-codebase-architecture`, `/tdd`, `/wayfinder`, `/prototype`, `/research`, `/resolving-merge-conflicts`, `/writing-for-agents` | Copy to `~/.claude/` — see below |
 | **Caveman** | `/caveman`, `/caveman-commit`, `/caveman-review` | `marketplace add` + `install` |
-| **Matt Pocock skills** | `/setup-matt-pocock-skills` and friends | External — see [mattpocock/skills](https://github.com/mattpocock/skills) |
+| **Matt Pocock (external)** | `/setup-matt-pocock-skills` | Still symlinked from `~/.agents/skills/` — run per repo before the engineering flows |
 
 ## Removed: ECC, GSD, and gstack
 
