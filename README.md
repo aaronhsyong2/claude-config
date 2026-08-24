@@ -29,6 +29,9 @@ claude-config/
 │   ├── prp-implement-team.md  # Orchestrator delegation (fork of /prp-implement)
 │   ├── write-a-skill.md       # Create new agent skills (dropped upstream, ours now)
 │   ├── zoom-out.md            # Step back and reassess (dropped upstream, ours now)
+│   ├── visual-plan.md         # Wrapper → visual-plan skill
+│   ├── visual-recap.md        # Wrapper → visual-recap skill
+│   ├── visual-docs.md         # Wrapper → visual-docs skill
 │   ├── ecc-code-review.md     # Local diff / PR review (vendored from ECC)
 │   └── ecc-review-pr.md       # Multi-agent PR review (vendored from ECC)
 ├── rules/
@@ -74,6 +77,13 @@ claude-config/
 │   │   ├── SKILL.md           # Group epic issues into PR batches
 │   │   ├── FORMAT.md
 │   │   └── SOURCES.md
+│   ├── visual-plan/           # Agent-Native visual plan
+│   ├── visual-recap/          # Agent-Native visual recap
+│   ├── visual-docs/           # Interactive docs/specs → standalone HTML
+│   │   ├── SKILL.md           # needs a one-time npm install in scripts/
+│   │   ├── references/
+│   │   ├── examples/
+│   │   └── scripts/
 │   │
 │   │                          # --- vendored from mattpocock/skills @ 5b15a47 ---
 │   ├── triage/                # Issue state machine + agent-ready briefs
@@ -252,6 +262,7 @@ Review side:
 | Source | Skills | Install Method |
 |--------|--------|----------------|
 | **This repo (own)** | `/pick-up`, `/learn-obsidian`, `/obsidian`, `/plan-tasks`, `/project-docs`, `/to-pr-plan`, `/prp-plan-team`, `/prp-implement-team`, `/write-a-skill`, `/zoom-out` + 15 agents | Copy to `~/.claude/` |
+| **Agent-Native** | `/visual-plan`, `/visual-recap`, `/visual-docs` | Copy to `~/.claude/`; `visual-docs` needs a one-time `npm install` in `skills/visual-docs/scripts/`. Refresh with `npx @agent-native/core@latest skills update <name>` |
 | **This repo (vendored, ECC)** | `/ecc-code-review`, `/ecc-review-pr`, `/strategic-compact` | Copy to `~/.claude/` |
 | **This repo (vendored, Matt Pocock)** | `/triage`, `/to-spec`, `/to-tickets`, `/diagnosing-bugs`, `/grill-with-docs`, `/grilling`, `/domain-modeling`, `/codebase-design`, `/improve-codebase-architecture`, `/tdd`, `/wayfinder`, `/prototype`, `/research`, `/resolving-merge-conflicts`, `/writing-for-agents` | Copy to `~/.claude/` — see below |
 | **Caveman** | `/caveman`, `/caveman-commit`, `/caveman-review` | `marketplace add` + `install` |
