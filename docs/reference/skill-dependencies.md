@@ -6,7 +6,7 @@ tags:
   - dependencies
   - pipeline
 created: 2026-05-02
-updated: 2026-08-24
+updated: 2026-08-26
 status: active
 related:
   - "[Claude Orchestrator PRD](../guide/claude-orchestrator-prd.md)"
@@ -124,6 +124,39 @@ defined in `rules/common/documentation.md`. Codex-only `agents/openai.yaml` is
 stripped from every skill. `ask-matt` is not adopted — it hard-references skills
 that were not taken.
 
+### Vendored from `cursor/plugins` → `pstack` @ `bdf7aa3`
+
+Forked on 2026-08-26 (MIT). Four skills out of 44, plus the `unslop` patterns as
+a rule. All four are standalone: none calls another skill, so none can break the
+others.
+
+| Skill | Role |
+|-------|------|
+| `/why` | Decision archaeology. Enumerates MCPs at run time, queries seven evidence categories in parallel, returns cited findings with calibrated confidence |
+| `/how` | Subsystem walkthrough, placement and layering questions, optional architecture critique |
+| `/blast-radius` | What a change breaks outside the diff, with the safety fact proven by running code |
+| `/show-me-your-work` | TSV decision log for unattended or multi-phase runs |
+
+**Deliberate divergence from upstream.** Everything here was written for Cursor:
+
+- `subagent_type: generalPurpose` → `general-purpose`; the `readonly` flag has no
+  Claude Code equivalent, so read-only is stated in each brief as a posture.
+- Model config was read from `~/.cursor/rules/pstack-models.mdc`. Slugs are now
+  fixed per role: `sonnet` to gather, `fable` to write prose, `opus` to critique.
+- `/how`'s critic panel drew its adversarial signal from **model** diversity across
+  four vendors. Only Claude models are available here, so it draws on **lens**
+  diversity instead: four critics, one each for coupling, failure modes, change
+  cost, and simplification.
+- `/why`'s MCP discovery reads the tool list plus `ToolSearch`, not Cursor's
+  `mcps/` directory.
+- `/show-me-your-work` reads `~/.claude/projects/<slug>/<session>.jsonl`.
+
+**Not adopted.** `poteto-mode` and its 22 playbooks (416K, bun lockfile, graphite
+throughout), `interrogate` / `arena` / `swarm` (same multi-vendor premise that does
+not survive the port, and `Workflow` plus the review agents already cover the
+fan-out), `setup-pstack` (writes `.cursor/rules/*.mdc`), the 21 `principle-*`
+skills, and 12 others that duplicate skills already here.
+
 ### Vendored from the ECC plugin
 
 The plugin itself was removed; only the parts in actual use were kept.
@@ -150,6 +183,10 @@ the caller, not just degrades it.
 | `/wayfinder` | `/prototype`, `/research`, `/grilling` | Three of its four ticket types |
 | `/pick-up` | `/diagnosing-bugs`, `/prp-plan-team`, `/grill-with-docs` | Its routing targets |
 | `/to-pr-plan` | `/project-docs` | Persists the PR plan document |
+
+None of the four pstack skills appears in this table: each is self-contained.
+`/why` and `/how` are documented as companions and cross-reference each other in
+prose, but neither invokes the other, so either works alone.
 
 `/improve-codebase-architecture` also reads `CONTEXT.md` and `docs/decisions/`.
 It degrades in a repo that has neither, so seed them before relying on it.

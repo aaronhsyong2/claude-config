@@ -35,7 +35,7 @@ claude-config/
 │   ├── ecc-code-review.md     # Local diff / PR review (vendored from ECC)
 │   └── ecc-review-pr.md       # Multi-agent PR review (vendored from ECC)
 ├── rules/
-│   ├── common/                # 9 global rules (all languages)
+│   ├── common/                # 10 global rules (all languages)
 │   │   ├── agents.md          # Agent orchestration and parallel execution
 │   │   ├── coding-style.md    # Immutability, file organization, error handling
 │   │   ├── documentation.md   # Doc structure, frontmatter, when to create docs
@@ -44,7 +44,8 @@ claude-config/
 │   │   ├── patterns.md        # Skeleton projects, repository pattern, API responses
 │   │   ├── performance.md     # Model selection, context window, extended thinking
 │   │   ├── security.md        # Mandatory checks, secret management, response protocol
-│   │   └── testing.md         # 80% coverage, TDD workflow, test types
+│   │   ├── testing.md         # 80% coverage, TDD workflow, test types
+│   │   └── unslop.md          # Cut AI tells from all writing (vendored from pstack)
 │   └── typescript/            # 5 TypeScript-specific rules
 │       ├── coding-style.md
 │       ├── hooks.md
@@ -117,7 +118,20 @@ claude-config/
 │   │   └── UI.md
 │   ├── research/              # Background agent -> cited markdown in repo
 │   ├── resolving-merge-conflicts/   # Resolve by intent, never --abort
-│   └── writing-for-agents/    # Writing skills, AGENTS.md, CLAUDE.md
+│   ├── writing-for-agents/    # Writing skills, AGENTS.md, CLAUDE.md
+│   │
+│   │                          # --- vendored from cursor/plugins pstack @ bdf7aa3 ---
+│   ├── why/                   # Decision archaeology across 7 evidence categories
+│   │   ├── SKILL.md           # PATCHED: MCP discovery via ToolSearch, Claude models
+│   │   └── references/        # epistemics, prompts, 8 per-source playbooks
+│   ├── how/                   # Subsystem walkthrough + architecture critique
+│   │   ├── SKILL.md           # PATCHED: critic panel is lens-diverse, not model-diverse
+│   │   └── references/        # explorer / explainer / critic prompts, rubric
+│   ├── blast-radius/          # What a small diff breaks elsewhere, proven by running it
+│   └── show-me-your-work/     # TSV decision log for unattended runs
+│       ├── SKILL.md           # PATCHED: transcript path is ~/.claude/projects/
+│       ├── references/decision-log-template.tsv
+│       └── scripts/log.sh
 │       ├── SKILL.md
 │       └── SKILL-MECHANICS.md
 └── LICENSE
@@ -265,6 +279,7 @@ Review side:
 | **Agent-Native** | `/visual-plan`, `/visual-recap`, `/visual-docs` | Copy to `~/.claude/`; `visual-docs` needs a one-time `npm install` in `skills/visual-docs/scripts/`. Refresh with `npx @agent-native/core@latest skills update <name>` |
 | **This repo (vendored, ECC)** | `/ecc-code-review`, `/ecc-review-pr`, `/strategic-compact` | Copy to `~/.claude/` |
 | **This repo (vendored, Matt Pocock)** | `/triage`, `/to-spec`, `/to-tickets`, `/diagnosing-bugs`, `/grill-with-docs`, `/grilling`, `/domain-modeling`, `/codebase-design`, `/improve-codebase-architecture`, `/tdd`, `/wayfinder`, `/prototype`, `/research`, `/resolving-merge-conflicts`, `/writing-for-agents` | Copy to `~/.claude/` — see below |
+| **This repo (vendored, pstack)** | `/why`, `/how`, `/blast-radius`, `/show-me-your-work` + the `unslop` rule | Copy to `~/.claude/` — see below |
 | **Caveman** | `/caveman`, `/caveman-commit`, `/caveman-review` | `marketplace add` + `install` |
 | **Matt Pocock (external)** | `/setup-matt-pocock-skills` | Still symlinked from `~/.agents/skills/` — run per repo before the engineering flows |
 
