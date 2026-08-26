@@ -53,10 +53,20 @@ claude-config/
 │       ├── security.md
 │       └── testing.md
 ├── hooks/
+│   ├── caveman-activate.js      # SessionStart: injects skills/caveman/SKILL.md as context
+│   ├── caveman-mode-tracker.js  # UserPromptSubmit: /caveman level switching + reinforcement
+│   ├── caveman-config.js        # Shared mode resolver + symlink-safe flag file I/O
 │   ├── sensitive-path-guard.sh  # Blocks writes to .env, .ssh, credentials, etc.
 │   ├── statusline.js            # Statusline: model | task | dir | context usage
 │   └── suggest-compact.js       # Optional PreToolUse compaction nudge (not wired by default)
 ├── skills/                    # Custom skills (directory format)
+│   ├── caveman/               # Compressed replies (vendored from the caveman plugin)
+│   │   ├── SKILL.md           # PATCHED: added the "With unslop" composition section
+│   │   └── LICENSE
+│   ├── caveman-commit/        # Compressed commit messages
+│   ├── caveman-review/        # Compressed PR review comments
+│   ├── caveman-compress/      # Compress a memory file in place
+│   ├── caveman-help/          # Mode reference card
 │   ├── learn-obsidian/
 │   │   ├── SKILL.md           # Save learnings to Obsidian vault
 │   │   └── CONVENTIONS.md     # Vault formatting rules
@@ -152,20 +162,26 @@ git clone https://github.com/ayong/claude-config.git ~/github/personal/claude-co
 
 ### Step 2: Install plugins
 
-The current Claude Code CLI installs plugins in two steps — add the marketplace, then install from it (`claude plugins add X@Y` no longer exists).
+None. Skip this step.
+
+This config runs with **zero plugins installed**. Everything it needs is in this
+repo and installs with Step 4. Verify with:
 
 ```bash
-# Caveman mode (compressed communication)
-claude plugins marketplace add JuliusBrussee/caveman
-claude plugins install caveman@caveman
-
-# UI/UX design skills
-claude plugins marketplace add nextlevelbuilder/ui-ux-pro-max-skill
-claude plugins install ui-ux-pro-max@ui-ux-pro-max-skill
-
-# Frontend design (from the built-in official marketplace)
-claude plugins install frontend-design@claude-plugins-official
+claude plugin list      # -> "No plugins installed."
 ```
+
+The last plugin standing was `caveman@caveman`. It was vendored on 2026-08-26 and
+uninstalled: its three hook scripts live in `hooks/`, its five skills in `skills/`,
+and its two hook entries in `settings.json`. `caveman-activate.js` reads
+`../skills/caveman/SKILL.md` relative to its own directory, which resolves the same
+under `~/.claude/` as it did inside the plugin, so nothing in the scripts needed
+changing.
+
+Uninstalled and not replaced: `ui-ux-pro-max@ui-ux-pro-max-skill` (1 use in five
+months), `frontend-design@claude-plugins-official` (0), `ruby-lsp@claude-plugins-official`
+(0). Their marketplaces were deregistered too. The two Anthropic marketplaces stay
+registered so `claude plugin install` still resolves if you ever want one.
 
 > **No ECC plugin, no GSD, no gstack.** All three were removed after a usage
 > audit — see [Removed: ECC, GSD, and gstack](#removed-ecc-gsd-and-gstack). The
@@ -280,8 +296,70 @@ Review side:
 | **This repo (vendored, ECC)** | `/ecc-code-review`, `/ecc-review-pr`, `/strategic-compact` | Copy to `~/.claude/` |
 | **This repo (vendored, Matt Pocock)** | `/triage`, `/to-spec`, `/to-tickets`, `/diagnosing-bugs`, `/grill-with-docs`, `/grilling`, `/domain-modeling`, `/codebase-design`, `/improve-codebase-architecture`, `/tdd`, `/wayfinder`, `/prototype`, `/research`, `/resolving-merge-conflicts`, `/writing-for-agents` | Copy to `~/.claude/` — see below |
 | **This repo (vendored, pstack)** | `/why`, `/how`, `/blast-radius`, `/show-me-your-work` + the `unslop` rule | Copy to `~/.claude/` — see below |
-| **Caveman** | `/caveman`, `/caveman-commit`, `/caveman-review` | `marketplace add` + `install` |
+| **This repo (vendored, caveman)** | `/caveman`, `/caveman-commit`, `/caveman-review`, `/caveman-compress`, `/caveman-help` | Copy to `~/.claude/` — needs `hooks/caveman-*.js` and the two `settings.json` hook entries |
 | **Matt Pocock (external)** | `/setup-matt-pocock-skills` | Still symlinked from `~/.agents/skills/` — run per repo before the engineering flows |
+
+## Upstream Sources
+
+Every external repo and plugin this config draws on, and what came from each.
+
+### Vendored — forked into this repo, now ours to edit
+
+| Source | Pinned at | What we took |
+|--------|-----------|--------------|
+| [`mattpocock/skills`](https://github.com/mattpocock/skills) | `5b15a47` (2026-08-24) | 15 skills: `/triage`, `/to-spec`, `/to-tickets`, `/diagnosing-bugs`, `/grill-with-docs`, `/grilling`, `/domain-modeling`, `/codebase-design`, `/improve-codebase-architecture`, `/tdd`, `/wayfinder`, `/prototype`, `/research`, `/resolving-merge-conflicts`, `/writing-for-agents` |
+| [`cursor/plugins`](https://github.com/cursor/plugins/tree/main/pstack) → `pstack` (MIT, Lauren Tan) | `bdf7aa3` (2026-08-26) | 4 skills of 44: `/why`, `/how`, `/blast-radius`, `/show-me-your-work`, plus `unslop` distilled into `rules/common/unslop.md` |
+| Everything Claude Code (`ecc@ecc`) | uninstalled 2026-08-24 | `/ecc-code-review`, `/ecc-review-pr`, `/strategic-compact`, 10 review agents |
+| [`JuliusBrussee/caveman`](https://github.com/JuliusBrussee/caveman) (MIT) | `84cc3c14` (2026-08-26) | 5 skills (`/caveman`, `-commit`, `-review`, `-compress`, `-help`), 3 hook scripts, 2 `settings.json` hook entries |
+| [Agent-Native](https://www.npmjs.com/package/@agent-native/core) | tracks latest | `/visual-plan`, `/visual-recap`, `/visual-docs` |
+
+Vendored copies diverge from upstream on purpose. Sync by diffing, never by
+overwriting. Known divergences:
+
+- `domain-modeling/ADR-FORMAT.md` points at `docs/decisions/` with three-digit
+  numbering and the frontmatter from `rules/common/documentation.md`.
+- Codex-only `agents/openai.yaml` is stripped from every Matt Pocock skill.
+- The four pstack skills were written for Cursor. Subagent types, model slugs,
+  the `readonly` flag, MCP discovery, and the transcript path were all rewritten
+  for Claude Code. `/how`'s critic panel traded model diversity for lens
+  diversity because only Claude models are available here.
+
+### Plugins — none
+
+Zero plugins installed, by design. `claude plugin list` returns
+"No plugins installed." Everything above is vendored or symlinked, so a fresh
+machine reproduces this config from Step 4 alone with no marketplace round-trip.
+
+Uninstalled on 2026-08-26 with their marketplaces deregistered:
+
+| Plugin | Uses | Disposition |
+|--------|------|-------------|
+| `caveman@caveman` | 4529 | Vendored into this repo, see above |
+| `ui-ux-pro-max@ui-ux-pro-max-skill` | 1 | Dropped |
+| `frontend-design@claude-plugins-official` | 0 | Dropped |
+| `ruby-lsp@claude-plugins-official` | 0 | Dropped |
+
+The two Anthropic marketplaces (`claude-plugins-official`, `claude-code-plugins`)
+remain registered. They install nothing on their own and keep
+`claude plugin install` working if a plugin is ever wanted again.
+
+### External symlinks — managed outside this repo
+
+| Path | Source | Provides |
+|------|--------|----------|
+| `~/.claude/skills/setup-matt-pocock-skills` | `~/.agents/skills/` | Per-repo config for the engineering pipeline. Run once per repo |
+| `~/.claude/skills/build-an-agent` | `~/.config/agents/` | House style for authoring agents and skills |
+
+### Referenced but not adopted
+
+- **`mattpocock/skills`** — `ask-matt` (router over 6 skills we didn't take),
+  and the `in-progress/` and `misc/` categories.
+- **`pstack`** — `poteto-mode` and its 22 playbooks (416K, bun lockfile,
+  graphite throughout), `interrogate` / `arena` / `swarm` (adversarial signal
+  comes from multi-vendor model diversity, which does not survive the port; the
+  `Workflow` tool and the review agents already cover the fan-out),
+  `setup-pstack` (writes `.cursor/rules/*.mdc`), the 21 `principle-*` skills,
+  and 12 others that duplicate skills already here.
 
 ## Removed: ECC, GSD, and gstack
 
@@ -349,7 +427,8 @@ nameless entries in the skill listing.
 These are managed elsewhere or are transient — don't version them:
 
 - `~/.agents/skills/source-command-*` — upstream sources for the Matt Pocock commands
-- `~/.claude/plugins/` — Plugin cache/data (managed by `claude plugins`)
+- `~/.claude/plugins/` — Plugin cache/data (managed by `claude plugin`). Nothing
+  is installed; the directory only holds the two Anthropic marketplace clones
 - `~/.claude/sessions/`, `session-data/`, `history.jsonl` — Personal session data
 
 ## Permissions Philosophy

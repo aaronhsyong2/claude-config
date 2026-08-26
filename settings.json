@@ -85,6 +85,16 @@
             "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"SessionStart\""
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/ayong/.claude/hooks/caveman-activate.js\"",
+            "timeout": 5,
+            "statusMessage": "Loading caveman mode..."
+          }
+        ]
       }
     ],
     "PostToolUse": [
@@ -137,6 +147,16 @@
           {
             "type": "command",
             "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"UserPromptSubmit\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/ayong/.claude/hooks/caveman-mode-tracker.js\"",
+            "timeout": 5,
+            "statusMessage": "Tracking caveman mode..."
           }
         ]
       }
@@ -212,32 +232,7 @@
     "type": "command",
     "command": "node \"/Users/ayong/.claude/hooks/statusline.js\""
   },
-  "enabledPlugins": {
-    "ui-ux-pro-max@ui-ux-pro-max-skill": true,
-    "frontend-design@claude-plugins-official": true,
-    "caveman@caveman": true,
-    "ruby-lsp@claude-plugins-official": true
-  },
-  "extraKnownMarketplaces": {
-    "ui-ux-pro-max-skill": {
-      "source": {
-        "source": "github",
-        "repo": "nextlevelbuilder/ui-ux-pro-max-skill"
-      }
-    },
-    "claude-code-plugins": {
-      "source": {
-        "source": "github",
-        "repo": "anthropics/claude-code"
-      }
-    },
-    "caveman": {
-      "source": {
-        "source": "github",
-        "repo": "JuliusBrussee/caveman"
-      }
-    }
-  },
+  "enabledPlugins": {},
   "alwaysThinkingEnabled": true,
   "tui": "fullscreen"
 }

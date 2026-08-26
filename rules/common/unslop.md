@@ -10,9 +10,27 @@ fights terseness), and pattern 26 gains a terms-of-art carve-out.
 
 ## Interaction with caveman mode
 
-They compose, they don't compete. Caveman governs **length** (drop articles,
-filler, pleasantries, hedging). Unslop governs **tells** (the patterns below).
-Where caveman stands down for code, commits, and PRs, unslop still applies.
+They compose. Caveman governs **length**: drop articles, filler, pleasantries,
+fragments allowed. Unslop governs **which words**: the patterns below. Only 7 of
+the 30 patterns overlap caveman, and those 7 are the filler and pleasantry ones
+both already cut.
+
+Where caveman stands down (code, commits, PRs, security warnings, its
+Auto-Clarity exception), unslop still applies. A slop commit message is still
+slop.
+
+Three edges, resolved the same way in both files:
+
+1. **Hedging.** Keep hedging that encodes evidence strength ("appears to",
+   "likely" in a `/why` finding). Cut social hedging ("I think maybe we could
+   possibly").
+2. **Fragments vs pattern 28.** Fragments have no actor and stay fine. Pattern 28
+   applies when you write a full clause.
+3. **Brevity vs pattern 26.** Specificity wins. Naming the mechanism or the number
+   is sometimes longer, and that is correct. Caveman cuts fluff, never facts.
+
+The full statement of this split lives in `skills/caveman/SKILL.md`, which the
+`caveman-activate` hook injects at every session start.
 
 ## Process
 
