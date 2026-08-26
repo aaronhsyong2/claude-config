@@ -110,34 +110,8 @@ if (skillContent) {
     'Code/commits/PRs: write normal. "stop caveman" or "normal mode": revert. Level persist until changed or session end.';
 }
 
-// 3. Detect missing statusline config — nudge Claude to help set it up
-try {
-  let hasStatusline = false;
-  if (fs.existsSync(settingsPath)) {
-    const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
-    if (settings.statusLine) {
-      hasStatusline = true;
-    }
-  }
-
-  if (!hasStatusline) {
-    const isWindows = process.platform === 'win32';
-    const scriptName = isWindows ? 'caveman-statusline.ps1' : 'caveman-statusline.sh';
-    const scriptPath = path.join(__dirname, scriptName);
-    const command = isWindows
-      ? `powershell -ExecutionPolicy Bypass -File "${scriptPath}"`
-      : `bash "${scriptPath}"`;
-    const statusLineSnippet =
-      '"statusLine": { "type": "command", "command": ' + JSON.stringify(command) + ' }';
-    output += "\n\n" +
-      "STATUSLINE SETUP NEEDED: The caveman plugin includes a statusline badge showing active mode " +
-      "(e.g. [CAVEMAN], [CAVEMAN:ULTRA]). It is not configured yet. " +
-      "To enable, add this to " + path.join(claudeDir, 'settings.json') + ": " +
-      statusLineSnippet + " " +
-      "Proactively offer to set this up for the user on first interaction.";
-  }
-} catch (e) {
-  // Silent fail — don't block session start over statusline detection
-}
+// 3. Statusline nudge removed. Upstream emitted a 'STATUSLINE SETUP NEEDED'
+//    block when settings.json had no statusLine key. This config deliberately
+//    runs without a statusline, so the nudge would fire on every session start.
 
 process.stdout.write(output);

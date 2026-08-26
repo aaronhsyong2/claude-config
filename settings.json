@@ -78,32 +78,12 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"SessionStart\""
-          }
-        ]
-      },
-      {
         "hooks": [
           {
             "type": "command",
             "command": "node \"/Users/ayong/.claude/hooks/caveman-activate.js\"",
             "timeout": 5,
             "statusMessage": "Loading caveman mode..."
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"PostToolUse\""
           }
         ]
       }
@@ -118,38 +98,9 @@
             "timeout": 5
           }
         ]
-      },
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"PreToolUse\""
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"SessionEnd\""
-          }
-        ]
       }
     ],
     "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"UserPromptSubmit\""
-          }
-        ]
-      },
       {
         "hooks": [
           {
@@ -160,77 +111,7 @@
           }
         ]
       }
-    ],
-    "PermissionRequest": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"PermissionRequest\""
-          }
-        ]
-      }
-    ],
-    "PostToolUseFailure": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"PostToolUseFailure\""
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"Stop\""
-          }
-        ]
-      }
-    ],
-    "StopFailure": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"StopFailure\""
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"Notification\""
-          }
-        ]
-      }
-    ],
-    "Elicitation": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/usr/bin/env ELECTRON_RUN_AS_NODE=1 \"/Applications/Comnyang.app/Contents/MacOS/Comnyang\" \"/Users/ayong/Library/Application Support/Comnyang/hooks/comnyang-claude-hook.js\" \"Elicitation\""
-          }
-        ]
-      }
     ]
-  },
-  "statusLine": {
-    "type": "command",
-    "command": "node \"/Users/ayong/.claude/hooks/statusline.js\""
   },
   "enabledPlugins": {},
   "alwaysThinkingEnabled": true,

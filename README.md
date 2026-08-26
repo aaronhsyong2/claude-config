@@ -57,7 +57,6 @@ claude-config/
 │   ├── caveman-mode-tracker.js  # UserPromptSubmit: /caveman level switching + reinforcement
 │   ├── caveman-config.js        # Shared mode resolver + symlink-safe flag file I/O
 │   ├── sensitive-path-guard.sh  # Blocks writes to .env, .ssh, credentials, etc.
-│   ├── statusline.js            # Statusline: model | task | dir | context usage
 │   └── suggest-compact.js       # Optional PreToolUse compaction nudge (not wired by default)
 ├── skills/                    # Custom skills (directory format)
 │   ├── caveman/               # Compressed replies (vendored from the caveman plugin)
@@ -189,12 +188,27 @@ registered so `claude plugin install` still resolves if you ever want one.
 
 ### Step 3: Configure MCP servers
 
+MCP servers live in `~/.claude.json`, **not** in this repo. That file also holds
+session state and OAuth material, so it is never committed. The `add` commands
+below carry no credentials and are safe to keep here; the HTTP servers each do a
+browser OAuth handshake on first use.
+
 ```bash
+# --- stdio ---
+
 # Browser automation — navigation, screenshots, console/network, Lighthouse
 claude mcp add chrome-devtools --scope user -- npx -y chrome-devtools-mcp@latest
 
 # Obsidian vault (required by /learn-obsidian and /obsidian)
 claude mcp add obsidian -- npx @bitbonsai/mcpvault@latest "/path/to/your/obsidian/vault"
+
+# --- http (OAuth on first use) ---
+
+claude mcp add --transport http context7   https://mcp.context7.com/mcp
+claude mcp add --transport http supabase   https://mcp.supabase.com/mcp
+claude mcp add --transport http atlassian  https://mcp.atlassian.com/v1/mcp
+claude mcp add --transport http cloudflare https://bindings.mcp.cloudflare.com/mcp
+claude mcp add --transport http Jam        https://mcp.jam.dev/mcp
 ```
 
 Replace the vault path with your actual Obsidian vault location. On macOS with iCloud sync, this is typically:
@@ -203,12 +217,23 @@ Replace the vault path with your actual Obsidian vault location. On macOS with i
 ~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Your Vault Name
 ```
 
+Gmail, Google Calendar, and Google Drive are provisioned by the Claude account,
+not configured here — they appear in `claude mcp list` on any machine you sign
+in on.
+
+Verify with `claude mcp list`. "Needs authentication" is expected until you use
+a server for the first time.
+
+> `railway-mcp-server` was configured at some point and no longer connects
+> (`-32000: Connection closed`). It is deliberately not in the list above.
+> Remove it with `claude mcp remove railway-mcp-server` if it is still present.
+
 ### Step 4: Copy config files
 
 ```bash
 REPO=~/github/personal/claude-config
 
-# Settings (permissions, hooks, plugins, statusline)
+# Settings (permissions + the three wired hooks)
 cp "$REPO/settings.json" ~/.claude/settings.json
 
 # Global instructions
@@ -217,18 +242,29 @@ cp "$REPO/CLAUDE.md" ~/.claude/CLAUDE.md
 # Rules
 cp -r "$REPO/rules/" ~/.claude/rules/
 
-# Hooks (guard + statusline + optional compaction nudge)
+# Hooks (sensitive-path guard, caveman activation, optional compaction nudge)
 mkdir -p ~/.claude/hooks && cp "$REPO/hooks/"* ~/.claude/hooks/
 
 # Custom skills
-cp -r "$REPO/skills/"* ~/.claude/skills/
+mkdir -p ~/.claude/skills && cp -r "$REPO/skills/"* ~/.claude/skills/
 
 # Domain agents + vendored review specialists
-cp -r "$REPO/agents/"* ~/.claude/agents/
+mkdir -p ~/.claude/agents && cp -r "$REPO/agents/"* ~/.claude/agents/
 
 # Custom commands
-cp -r "$REPO/commands/"* ~/.claude/commands/
+mkdir -p ~/.claude/commands && cp -r "$REPO/commands/"* ~/.claude/commands/
 ```
+
+**Optional: the `visual-*` skills.** `visual-plan`, `visual-recap`, and
+`visual-docs` are tracked here but not installed on every machine. To skip them:
+
+```bash
+rm -rf ~/.claude/skills/visual-{plan,recap,docs}
+rm -f  ~/.claude/commands/visual-{plan,recap,docs}.md
+```
+
+`visual-docs` also needs a one-time `npm install` in its `scripts/` directory
+before it will run, so leaving it out costs nothing if you are not using it.
 
 ### Step 5: Fix paths in settings.json
 
@@ -241,25 +277,45 @@ sed -i '' "s|/Users/ayong|$HOME|g" ~/.claude/settings.json
 sed -i "s|/Users/ayong|$HOME|g" ~/.claude/settings.json
 ```
 
-`settings.json` references two hooks by absolute path — `sensitive-path-guard.sh`
-(PreToolUse on `Write|Edit`) and `statusline.js` (statusLine). Both ship in
-`hooks/`, so Step 4 + the `sed` above are all that's needed.
+`settings.json` references three hooks by absolute path, all shipped in `hooks/`,
+so Step 4 plus the `sed` above are all that is needed:
+
+| Hook | Event |
+|------|-------|
+| `sensitive-path-guard.sh` | `PreToolUse` on `Write\|Edit` — blocks writes to `.env`, `.ssh`, credentials |
+| `caveman-activate.js` | `SessionStart` — injects `skills/caveman/SKILL.md` as context |
+| `caveman-mode-tracker.js` | `UserPromptSubmit` — `/caveman` level switching, per-turn reinforcement |
+
+Those three are the *only* hooks wired. There is no statusline: `settings.json`
+has no `statusLine` key and `hooks/statusline.js` was deleted, because the file
+was GSD's and still carried its update-check code paths after GSD was removed.
+`hooks/suggest-compact.js` ships but is deliberately unwired.
 
 ### Step 6: Verify
 
 Start a new Claude Code session and check:
 
 ```
-/pick-up            # Should be available
-/triage             # Should be available
+/pick-up            # Route a triaged issue to the right workflow
+/triage             # Issue state machine
 /prp-plan-team      # Agent-aware planning
-/grill-me           # Should be available
+/grilling           # The interview primitive (was /grill-me before the fork)
+/why                # Decision archaeology
 /ecc-review-pr      # Multi-agent PR review (vendored)
+/caveman-help       # Caveman mode reference card
 ```
 
-The statusline should render `model │ task │ dir │ context`. If it's blank,
-`~/.claude/hooks/statusline.js` is missing or the path in `settings.json`
-wasn't rewritten.
+Caveman mode should announce itself in the first turn's context. If it does not,
+check that `settings.json` points at `~/.claude/hooks/caveman-activate.js` with
+the path rewritten by Step 5, and that `~/.claude/skills/caveman/SKILL.md` exists
+— the hook reads it at runtime and silently falls back to a shorter built-in
+ruleset when it is missing.
+
+```bash
+claude plugin list      # -> "No plugins installed."
+claude mcp list         # -> the servers from Step 3
+node ~/.claude/hooks/caveman-activate.js | head -1   # -> CAVEMAN MODE ACTIVE — level: full
+```
 
 ## Workflow Pipeline
 
@@ -376,8 +432,13 @@ directory. Removed: `~/.claude/skills/gsd-*`, `~/.claude/agents/gsd-*.md`,
 `~/.claude/hooks/gsd-*`, `~/.claude/get-shit-done/`, the installer state files,
 and the 9 hook entries in `settings.json`.
 
-`gsd-statusline.js` was the one piece worth keeping — it is not workflow-coupled.
-It lives on as `hooks/statusline.js`, decoupled from the GSD name.
+`gsd-statusline.js` was kept at the time as `hooks/statusline.js`. That was a
+rename, not a decoupling: the file still declared `gsd-hook-version: 1.42.3`,
+read `~/.cache/gsd/gsd-update-check.json`, and could still print
+`⬆ /gsd:update` or `⚠ stale hooks — run /gsd:update` for a plugin that no longer
+existed. It was deleted on 2026-08-26 along with the `statusLine` key, and
+`caveman-activate.js` lost its "statusline setup needed" nudge so it does not
+fire every session. No statusline is configured now.
 
 **ECC (`ecc@ecc`) — uninstalled, the used parts vendored.** Only 3 of its ~363
 commands and skills were ever invoked (`/ecc:strategic-compact` ×170,
@@ -426,10 +487,36 @@ nameless entries in the skill listing.
 
 These are managed elsewhere or are transient — don't version them:
 
+- `~/.claude.json` — MCP server definitions, session state, and OAuth material.
+  Reproduce the servers with Step 3 instead; never commit this file
 - `~/.agents/skills/source-command-*` — upstream sources for the Matt Pocock commands
 - `~/.claude/plugins/` — Plugin cache/data (managed by `claude plugin`). Nothing
   is installed; the directory only holds the two Anthropic marketplace clones
 - `~/.claude/sessions/`, `session-data/`, `history.jsonl` — Personal session data
+
+### Installed here but intentionally untracked
+
+Present in `~/.claude/` on this machine, deliberately absent from the repo:
+
+| Path | Why |
+|------|-----|
+| `skills/build-an-agent` | Symlink to `~/.config/agents/`, managed there |
+| `skills/setup-matt-pocock-skills` | Symlink to `~/.agents/skills/`, run once per repo |
+| One project-specific pre-deploy skill | Names a client project; the repo is project-agnostic |
+
+### Tracked here but not installed on this machine
+
+`visual-plan`, `visual-recap`, and `visual-docs` (skills and command wrappers).
+They came in from another machine and are kept in the repo, but not installed
+here. See the note in [Step 4](#step-4-copy-config-files).
+
+### Removed hard dependencies
+
+`settings.json` previously wired **11 hook events** to Comnyang
+(`/Applications/Comnyang.app` plus a hook script under
+`~/Library/Application Support/`). The app is not functional, so every one of
+those entries was removed on 2026-08-26 — they would have fired against a
+missing binary on any other machine. Three hooks remain, all shipped in `hooks/`.
 
 ## Permissions Philosophy
 
