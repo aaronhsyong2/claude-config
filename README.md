@@ -1,6 +1,7 @@
-# Claude Code Config
+# Claude Code + Codex Config
 
-My global Claude Code configuration. Everything needed to reproduce my exact setup on a fresh machine.
+My shared Claude Code and Codex configuration. The workflows, rules, skills, and
+agent definitions have one canonical source, with harness-specific adapters.
 
 ## What's In This Repo
 
@@ -317,18 +318,46 @@ claude mcp list         # -> the servers from Step 3
 node ~/.claude/hooks/caveman-activate.js | head -1   # -> CAVEMAN MODE ACTIVE — level: full
 ```
 
+## Codex Setup
+
+The tracked `.codex/` directory contains a portable Codex baseline, thin agent
+and command adapters, and no credentials or machine-specific paths. For an
+existing config, the installer manages multi-agent discovery and role registry
+keys while preserving its machine-specific top-level settings. Shared
+skills remain canonical under `skills/`; the installer links them into Codex so
+repo edits cannot silently drift from the installed versions.
+
+Preview changes, synchronize, and verify:
+
+```bash
+./scripts/install-codex.sh --dry-run
+./scripts/install-codex.sh
+./scripts/install-codex.sh --check
+bash tests/install-codex.test.sh
+```
+
+The installer preserves unrelated Codex content. When a repo-managed skill or
+role already exists, it moves the old version into a timestamped directory under
+`~/.codex/backups/` before replacing it with a link to this repo.
+
+Keep runtime-only settings in `~/.codex/config.toml`: notification application
+paths, project trust, profiles, plugins, OAuth state, and the local Obsidian vault
+path. Claude hooks do not execute in Codex; Codex uses its sandbox, approval
+policy, and `.codex/AGENTS.md` safety instructions instead. Caveman is available
+as an explicit skill rather than injected at session start.
+
 ## Workflow Pipeline
 
 My idea-to-implementation pipeline:
 
 ```
-/grill-me        → Stress-test the idea (conversation)
-/to-prd          → Synthesize into PRD (GitHub issue)
-/to-issues       → Break into vertical slices (GitHub issues)
+/grill-with-docs → Stress-test the idea and synthesize decisions
+/to-spec         → Synthesize into a specification (GitHub issue)
+/to-tickets      → Break into vertical slices (GitHub issues)
 /to-pr-plan      → Group into PR batches with dependency order
 /triage          → Classify + write agent brief (labels + comment)
 /pick-up #N      → Route to right workflow:
-  ├── bug        → /diagnose (6-phase loop)
+  ├── bug        → /diagnosing-bugs (feedback-loop-first diagnosis)
   └── enhancement
       ├── clear  → /prp-plan-team → /prp-implement-team (delegated to domain agents)
       └── unclear → interactive planning

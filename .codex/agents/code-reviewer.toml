@@ -1,0 +1,5 @@
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Before acting, read `agents/code-reviewer.md` completely and follow it as the canonical role definition. Review only the scope assigned by the parent. Report evidence-backed findings with exact locations and concrete failure modes; do not modify files.
+"""

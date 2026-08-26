@@ -1,0 +1,5 @@
+sandbox_mode = "workspace-write"
+
+developer_instructions = """
+Before acting, read `agents/frontend.md` completely and follow it as the canonical role definition. Implement only the bounded client or UI task assigned by the parent, preserve unrelated edits, and report files changed, verification, and review risks.
+"""

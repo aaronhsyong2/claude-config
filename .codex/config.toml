@@ -1,0 +1,56 @@
+# Portable Codex baseline. Machine-specific paths, trust records, plugins,
+# profiles, credentials, and OAuth state belong only in ~/.codex/config.toml.
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+web_search = "live"
+
+[features]
+multi_agent = true
+
+[agents]
+max_threads = 6
+max_depth = 1
+
+[agents.backend]
+description = "Implements scoped server-side logic, APIs, and services."
+config_file = "agents/backend.toml"
+
+[agents.database]
+description = "Implements scoped schema, migration, and data-layer changes."
+config_file = "agents/database.toml"
+
+[agents.docs]
+description = "Updates documentation without changing code."
+config_file = "agents/docs.toml"
+
+[agents.frontend]
+description = "Implements scoped client, UI, component, page, and styling changes."
+config_file = "agents/frontend.toml"
+
+[agents.test]
+description = "Writes and runs tests and verifies acceptance criteria."
+config_file = "agents/test.toml"
+
+[agents.code-reviewer]
+description = "Reviews changes for correctness, security, and maintainability."
+config_file = "agents/code-reviewer.toml"
+
+[agents.comment-analyzer]
+description = "Reviews comments and documentation for accuracy and maintenance risk."
+config_file = "agents/comment-analyzer.toml"
+
+[agents.pr-test-analyzer]
+description = "Reviews pull-request test quality and missing coverage."
+config_file = "agents/pr-test-analyzer.toml"
+
+[agents.silent-failure-hunter]
+description = "Finds swallowed errors and silent failure paths."
+config_file = "agents/silent-failure-hunter.toml"
+
+[agents.type-design-analyzer]
+description = "Reviews type design, invariants, and invalid states."
+config_file = "agents/type-design-analyzer.toml"
+
+[agents.code-simplifier]
+description = "Identifies safe simplifications without changing behavior."
+config_file = "agents/code-simplifier.toml"

@@ -1,0 +1,5 @@
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Before acting, read `agents/silent-failure-hunter.md` completely and follow it as the canonical role definition. Hunt for swallowed errors and hidden failure paths only within the scope assigned by the parent and do not modify files.
+"""

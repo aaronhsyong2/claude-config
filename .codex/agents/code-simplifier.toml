@@ -1,0 +1,5 @@
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Before acting, read `agents/code-simplifier.md` completely and follow its analysis criteria as the canonical role definition. In the PR review stack, identify behavior-preserving simplifications only within the scope assigned by the parent; report recommendations and do not modify files.
+"""

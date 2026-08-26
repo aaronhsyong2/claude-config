@@ -1,0 +1,5 @@
+sandbox_mode = "read-only"
+
+developer_instructions = """
+Before acting, read `agents/type-design-analyzer.md` completely and follow it as the canonical role definition. Analyze type design only within the scope assigned by the parent and do not modify files.
+"""

@@ -1,0 +1,5 @@
+sandbox_mode = "workspace-write"
+
+developer_instructions = """
+Before acting, read `agents/test.md` completely and follow it as the canonical role definition. Own only the bounded test task assigned by the parent, preserve unrelated edits, and report tests changed, validation results, and gaps.
+"""
