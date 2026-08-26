@@ -171,6 +171,47 @@ The plugin itself was removed; only the parts in actual use were kept.
 Prefixed `ecc-` because bare `code-review` collides with the built-in
 `/code-review`.
 
+### Vendored from the caveman plugin @ `84cc3c14`
+
+Forked on 2026-08-26 (MIT, Julius Brussee) so that no plugin needs to be
+installed. `claude plugin list` returns "No plugins installed."
+
+| Skill | Role |
+|-------|------|
+| `/caveman` | Compressed replies. Six intensity levels, `full` by default |
+| `/caveman-commit` | Compressed commit messages, Conventional Commits |
+| `/caveman-review` | Compressed PR review comments, one line each |
+| `/caveman-compress` | Compress a memory file in place, backup alongside |
+| `/caveman-help` | Mode reference card |
+
+Unlike every other skill here, caveman is **hook-driven, not invoked**. Three
+scripts in `hooks/` and two entries in `settings.json` do the work:
+
+| Hook | Event | Does |
+|------|-------|------|
+| `caveman-activate.js` | `SessionStart` | Reads `skills/caveman/SKILL.md`, filters it to the active intensity, injects it as context |
+| `caveman-mode-tracker.js` | `UserPromptSubmit` | Handles `/caveman <level>`, writes the flag file, re-injects a one-line reminder each turn |
+| `caveman-config.js` | — | Shared mode resolver, symlink-safe flag file I/O |
+
+`caveman-activate.js` resolves `SKILL.md` as `__dirname/../skills/caveman/SKILL.md`,
+which lands correctly under `~/.claude/` without any edit to the script. Editing
+`skills/caveman/SKILL.md` changes behaviour from the next session, with no hook
+change needed.
+
+**Deliberate divergence from upstream.** `skills/caveman/SKILL.md` gained a
+"With unslop" section stating how the two compose. `caveman-activate.js` lost its
+"statusline setup needed" nudge, which fired whenever `settings.json` had no
+`statusLine` key; this config deliberately has none, so the nudge would have
+appeared every session.
+
+### Related: the `unslop` rule
+
+`rules/common/unslop.md` is not a skill. It is auto-loaded from `~/.claude/rules/`
+every session, so it needs no invocation. It and caveman are the only two things
+here that shape output unconditionally, and they are written to compose: caveman
+governs length, unslop governs which words. The three edge cases (hedging,
+fragments, brevity vs specificity) are resolved identically in both files.
+
 ## Inter-Skill Dependencies
 
 Skills that call other skills via the Skill tool. Removing a dependency breaks
@@ -196,8 +237,34 @@ It degrades in a repo that has neither, so seed them before relying on it.
 To confirm no skill points at something that does not exist:
 
 ```bash
-# every /slash-command referenced anywhere in the repo
-grep -rhoE '/[a-z][a-z0-9-]{2,}' skills commands --include='*.md' | sort -u
+# Prints every referenced slash-command that has no matching skill or command.
+# Silence means no dangling references.
+have=$( (ls commands/*.md | sed 's|commands/||;s|\.md$||'; \
+         ls -d skills/*/ | sed 's|skills/||;s|/$||') | sort -u )
+# Built-ins, externally-provided commands, and URL routes that look like commands.
+allow='tmp|code-review|compact|mcp|plan|settings|command|word|setup-matt-pocock-skills|board|queue'
+grep -rhoE '`/[a-z][a-z0-9-]{2,}`' skills commands rules docs --include='*.md' \
+  | tr -d '`/' | sort -u | grep -vxE "$allow" \
+  | while read -r r; do echo "$have" | grep -qx "$r" || echo "DANGLING: /$r"; done
 ```
 
-Cross-check that list against `ls commands/` and `ls -d skills/*/`.
+The allowlist covers Claude Code built-ins (`/compact`, `/mcp`, `/plan`,
+`/code-review`), `/setup-matt-pocock-skills` (symlinked from `~/.agents/skills/`,
+see the Prerequisite section), Pi's own commands (`/board`, `/queue`, referenced
+by `/plan-tasks`), and a few strings that only look like commands: `/settings` is
+a URL route in a `/prototype` example, `/command` and `/word` appear in this
+document's own prose, and `/tmp` is a filesystem path in `/improve-codebase-architecture`.
+
+The earlier version of this check grepped for bare `/word`, which matched file
+paths and prose as well as commands. This one only considers backticked
+`/command` references, which is how every skill here writes them.
+
+Two more worth running before a push:
+
+```bash
+# no project, client, or org names — the repo is public and project-agnostic
+grep -rniE '<client-or-project-names>' --exclude-dir=.git .
+
+# README counts still match reality
+ls -d skills/*/ | wc -l; ls commands/*.md | wc -l; ls rules/common/*.md | wc -l
+```

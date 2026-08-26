@@ -1,6 +1,6 @@
 # Vault Conventions
 
-Formatting rules for the Obsidian vault. Both `/learn` and `/obsidian` follow these.
+Formatting rules for the Obsidian vault. Both `/learn-obsidian` and `/obsidian` follow these.
 
 ## Frontmatter
 

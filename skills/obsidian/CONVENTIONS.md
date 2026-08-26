@@ -1,6 +1,6 @@
 # Vault Conventions
 
-Formatting rules for the Obsidian vault. Shared with `/learn`.
+Formatting rules for the Obsidian vault. Shared with `/learn-obsidian`.
 
 ## Frontmatter
 
