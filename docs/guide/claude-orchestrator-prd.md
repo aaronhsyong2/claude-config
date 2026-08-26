@@ -7,12 +7,24 @@ tags:
   - tui
   - workflow
 created: 2026-05-02
-updated: 2026-05-02
-status: draft
+updated: 2026-08-26
+status: archived
 related: []
 ---
 
 # PRD: Claude Orchestrator
+
+> **Archived 2026-08-26.** Never built. Kept as a record of the design and of
+> the problem it was aimed at, not as a plan of record. Two things have changed
+> since it was written on 2026-05-02, and both should be re-examined before any
+> of this is picked up again:
+>
+> - Claude Code now ships its own `Workflow` tool and background `Agent` tasks,
+>   which cover much of the concurrent-execution and fan-out this PRD proposed
+>   building from scratch.
+> - The pipeline it names has been renamed and re-pointed since. See
+>   [Skill Dependencies](../reference/skill-dependencies.md) for the current
+>   shape; the stage names below are the pre-fork ones.
 
 ## Problem Statement
 

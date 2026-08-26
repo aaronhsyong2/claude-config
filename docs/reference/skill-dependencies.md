@@ -9,7 +9,7 @@ created: 2026-05-02
 updated: 2026-08-26
 status: active
 related:
-  - "[Claude Orchestrator PRD](../guide/claude-orchestrator-prd.md)"
+  - "[Claude Orchestrator PRD](../guide/claude-orchestrator-prd.md)" (archived)
 ---
 
 # Skill Dependencies

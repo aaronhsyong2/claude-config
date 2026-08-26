@@ -365,7 +365,7 @@ Every external repo and plugin this config draws on, and what came from each.
 |--------|-----------|--------------|
 | [`mattpocock/skills`](https://github.com/mattpocock/skills) | `5b15a47` (2026-08-24) | 15 skills: `/triage`, `/to-spec`, `/to-tickets`, `/diagnosing-bugs`, `/grill-with-docs`, `/grilling`, `/domain-modeling`, `/codebase-design`, `/improve-codebase-architecture`, `/tdd`, `/wayfinder`, `/prototype`, `/research`, `/resolving-merge-conflicts`, `/writing-for-agents` |
 | [`cursor/plugins`](https://github.com/cursor/plugins/tree/main/pstack) → `pstack` (MIT, Lauren Tan) | `bdf7aa3` (2026-08-26) | 4 skills of 44: `/why`, `/how`, `/blast-radius`, `/show-me-your-work`, plus `unslop` distilled into `rules/common/unslop.md` |
-| Everything Claude Code (`ecc@ecc`) | uninstalled 2026-08-24 | `/ecc-code-review`, `/ecc-review-pr`, `/strategic-compact`, 10 review agents |
+| [`affaan-m/ECC`](https://github.com/affaan-m/ECC) — Everything Claude Code (`ecc@ecc`) | uninstalled 2026-08-24 | `/ecc-code-review`, `/ecc-review-pr`, `/strategic-compact`, 10 review agents |
 | [`JuliusBrussee/caveman`](https://github.com/JuliusBrussee/caveman) (MIT) | `84cc3c14` (2026-08-26) | 5 skills (`/caveman`, `-commit`, `-review`, `-compress`, `-help`), 3 hook scripts, 2 `settings.json` hook entries |
 | [Agent-Native](https://www.npmjs.com/package/@agent-native/core) | tracks latest | `/visual-plan`, `/visual-recap`, `/visual-docs` |
 
