@@ -1,3 +1,4 @@
+name = "docs"
 sandbox_mode = "workspace-write"
 
 developer_instructions = """

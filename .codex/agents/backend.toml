@@ -1,3 +1,4 @@
+name = "backend"
 sandbox_mode = "workspace-write"
 
 developer_instructions = """

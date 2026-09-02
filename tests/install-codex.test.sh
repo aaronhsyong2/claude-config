@@ -121,6 +121,7 @@ js_repl = false
 multi_agent = false
 
 [agents]
+max_concurrent_threads_per_session = 2
 max_threads = 2
 max_depth = 3
 EOF
@@ -149,6 +150,12 @@ assert_link_target 'command adapter is installed from the Codex source tree' \
   "$install_target/skills/prp-plan-team" "$REPO_ROOT/.codex/skills/prp-plan-team"
 assert_link_target 'Codex agent role is installed from the tracked source' \
   "$install_target/agents/backend.toml" "$REPO_ROOT/.codex/agents/backend.toml"
+for role_path in "$REPO_ROOT"/.codex/agents/*.toml; do
+  role_name=${role_path##*/}
+  role_name=${role_name%.toml}
+  assert_file_contains "Codex agent role $role_name declares its name" \
+    "$role_path" "name = \"$role_name\""
+done
 
 if test -f "$install_target/AGENTS.md" && cmp -s "$REPO_ROOT/.codex/AGENTS.md" "$install_target/AGENTS.md"; then
   pass 'tracked Codex instructions are installed exactly'
@@ -166,7 +173,8 @@ else
 fi
 if test "$(grep -Ec '^multi_agent[[:space:]]*=' "$install_target/config.toml")" -eq 1 \
   && test "$(grep -Ec '^max_threads[[:space:]]*=' "$install_target/config.toml")" -eq 1 \
-  && test "$(grep -Ec '^max_depth[[:space:]]*=' "$install_target/config.toml")" -eq 1; then
+  && test "$(grep -Ec '^max_depth[[:space:]]*=' "$install_target/config.toml")" -eq 1 \
+  && ! grep -Eq '^max_concurrent_threads_per_session[[:space:]]*=' "$install_target/config.toml"; then
   pass 'managed TOML keys replace differing values without duplication'
 else
   fail 'managed TOML keys replace differing values without duplication'

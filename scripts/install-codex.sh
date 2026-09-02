@@ -119,6 +119,7 @@ ensure_config() {
     fi
     return 0
   fi
+  ensure_table_key_absent "$target_config" '[agents]' 'max_concurrent_threads_per_session'
   ensure_table_key "$target_config" '[features]' 'multi_agent = true'
   ensure_table_key "$target_config" '[agents]' 'max_threads = 6'
   ensure_table_key "$target_config" '[agents]' 'max_depth = 1'
@@ -136,6 +137,28 @@ ensure_config() {
       printing { print }
     ' "$baseline" >>"$target_config"
   done
+}
+
+ensure_table_key_absent() {
+  config_path=$1
+  table_header=$2
+  key_name=$3
+  if ! awk -v header="$table_header" -v key="$key_name" '
+    /^\[/ { in_table = ($0 == header) }
+    in_table && $0 ~ "^[[:space:]]*" key "[[:space:]]*=" { found = 1 }
+    END { exit(found ? 0 : 1) }
+  ' "$config_path"; then
+    return 0
+  fi
+  report_drift "remove legacy $key_name from $table_header in $config_path"
+  test "$MODE" = install || return 0
+  temp_config=$(mktemp "${TMPDIR:-/tmp}/codex-config.XXXXXX")
+  awk -v header="$table_header" -v key="$key_name" '
+    /^\[/ { in_table = ($0 == header) }
+    in_table && $0 ~ "^[[:space:]]*" key "[[:space:]]*=" { next }
+    { print }
+  ' "$config_path" >"$temp_config"
+  mv "$temp_config" "$config_path"
 }
 
 ensure_table_key() {

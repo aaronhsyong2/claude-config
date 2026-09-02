@@ -1,3 +1,4 @@
+name = "database"
 sandbox_mode = "workspace-write"
 
 developer_instructions = """
