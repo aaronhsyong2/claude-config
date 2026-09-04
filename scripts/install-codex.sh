@@ -119,10 +119,10 @@ ensure_config() {
     fi
     return 0
   fi
-  ensure_table_key_absent "$target_config" '[agents]' 'max_concurrent_threads_per_session'
+  ensure_table_key_absent "$target_config" '[agents]' 'max_threads'
+  ensure_table_key_absent "$target_config" '[agents]' 'max_depth'
   ensure_table_key "$target_config" '[features]' 'multi_agent = true'
-  ensure_table_key "$target_config" '[agents]' 'max_threads = 6'
-  ensure_table_key "$target_config" '[agents]' 'max_depth = 1'
+  ensure_table_key "$target_config" '[agents]' 'max_concurrent_threads_per_session = 6'
 
   for role_name in backend database docs frontend test code-reviewer comment-analyzer pr-test-analyzer silent-failure-hunter type-design-analyzer code-simplifier; do
     if grep -Fq "[agents.$role_name]" "$target_config"; then

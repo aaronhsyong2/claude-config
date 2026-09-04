@@ -1,4 +1,5 @@
 name = "database"
+description = "Implements scoped schema, migration, and data-layer changes."
 sandbox_mode = "workspace-write"
 
 developer_instructions = """

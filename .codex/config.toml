@@ -8,8 +8,7 @@ web_search = "live"
 multi_agent = true
 
 [agents]
-max_threads = 6
-max_depth = 1
+max_concurrent_threads_per_session = 6
 
 [agents.backend]
 description = "Implements scoped server-side logic, APIs, and services."

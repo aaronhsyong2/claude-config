@@ -1,4 +1,5 @@
 name = "frontend"
+description = "Implements scoped client, UI, component, page, and styling changes."
 sandbox_mode = "workspace-write"
 
 developer_instructions = """

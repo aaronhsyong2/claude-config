@@ -1,4 +1,5 @@
 name = "test"
+description = "Writes and runs tests and verifies acceptance criteria."
 sandbox_mode = "workspace-write"
 
 developer_instructions = """

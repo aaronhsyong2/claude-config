@@ -1,4 +1,5 @@
 name = "silent-failure-hunter"
+description = "Finds swallowed errors and silent failure paths."
 sandbox_mode = "read-only"
 
 developer_instructions = """

@@ -1,4 +1,5 @@
 name = "code-simplifier"
+description = "Identifies safe simplifications without changing behavior."
 sandbox_mode = "read-only"
 
 developer_instructions = """

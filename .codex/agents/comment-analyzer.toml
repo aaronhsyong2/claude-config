@@ -1,4 +1,5 @@
 name = "comment-analyzer"
+description = "Reviews comments and documentation for accuracy and maintenance risk."
 sandbox_mode = "read-only"
 
 developer_instructions = """

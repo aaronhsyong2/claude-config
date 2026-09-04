@@ -1,4 +1,5 @@
 name = "code-reviewer"
+description = "Reviews changes for correctness, security, and maintainability."
 sandbox_mode = "read-only"
 
 developer_instructions = """

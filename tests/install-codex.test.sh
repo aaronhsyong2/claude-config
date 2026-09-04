@@ -155,6 +155,8 @@ for role_path in "$REPO_ROOT"/.codex/agents/*.toml; do
   role_name=${role_name%.toml}
   assert_file_contains "Codex agent role $role_name declares its name" \
     "$role_path" "name = \"$role_name\""
+  assert_file_contains "Codex agent role $role_name declares its description" \
+    "$role_path" 'description = '
 done
 
 if test -f "$install_target/AGENTS.md" && cmp -s "$REPO_ROOT/.codex/AGENTS.md" "$install_target/AGENTS.md"; then
@@ -172,13 +174,16 @@ else
   fail 'existing TOML feature table is merged without duplication'
 fi
 if test "$(grep -Ec '^multi_agent[[:space:]]*=' "$install_target/config.toml")" -eq 1 \
-  && test "$(grep -Ec '^max_threads[[:space:]]*=' "$install_target/config.toml")" -eq 1 \
-  && test "$(grep -Ec '^max_depth[[:space:]]*=' "$install_target/config.toml")" -eq 1 \
-  && ! grep -Eq '^max_concurrent_threads_per_session[[:space:]]*=' "$install_target/config.toml"; then
+  && test "$(grep -Ec '^max_concurrent_threads_per_session[[:space:]]*=' "$install_target/config.toml")" -eq 1 \
+  && ! grep -Eq '^(max_threads|max_depth)[[:space:]]*=' "$install_target/config.toml"; then
   pass 'managed TOML keys replace differing values without duplication'
 else
   fail 'managed TOML keys replace differing values without duplication'
 fi
+assert_file_contains 'PRP implementation adapter uses Codex role delegation' \
+  "$REPO_ROOT/.codex/skills/prp-implement-team/SKILL.md" 'spawn_agent'
+assert_file_contains 'PRP implementation adapter maps plan roles to Codex agent types' \
+  "$REPO_ROOT/.codex/skills/prp-implement-team/SKILL.md" 'agent_type'
 assert_file_contains 'existing machine-specific config is preserved' \
   "$install_target/config.toml" '[mcp_servers.personal]'
 

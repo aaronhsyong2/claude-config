@@ -1,4 +1,5 @@
 name = "backend"
+description = "Implements scoped server-side logic, APIs, and services."
 sandbox_mode = "workspace-write"
 
 developer_instructions = """
